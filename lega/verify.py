@@ -21,7 +21,7 @@ from crypt4gh.lib import decrypt
 
 from .conf import CONF
 from .utils import db, storage, key, errors
-from .utils.amqp import consume, get_connection
+from .utils.amqp import consume
 
 LOG = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ class PrependHeaderFile():
 
 
 @errors.catch(ret_on_error=(None, True))
-def work(key, mover, channel, data):
+def work(key, mover, data):
     """Verify that the file in the archive can be properly decrypted."""
     LOG.info('Verification | message: %s', data)
 
@@ -144,7 +144,7 @@ def work(key, mover, channel, data):
     org_msg['reference'] = file_id
     org_msg['checksum'] = {'value': digest, 'algorithm': 'sha256'}
     LOG.debug(f"Reply message: {org_msg}")
-    return org_msg
+    return (org_msg, False)
 
 
 def main(args=None):
@@ -171,10 +171,9 @@ def main(args=None):
         # we retrieve the s3 bucket name for the archive
         path = CONF.get_value('archive', 's3_bucket')
 
-    broker = get_connection('broker')
-    do_work = partial(work, key_loader(key_config), store('archive', path), broker.channel())
+    do_work = partial(work, key_loader(key_config), store('archive', path))
 
-    consume(do_work, broker, 'archived', 'completed')
+    consume(do_work, 'archived', 'completed')
 
 
 if __name__ == '__main__':
