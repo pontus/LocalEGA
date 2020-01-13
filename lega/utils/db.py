@@ -220,6 +220,18 @@ def set_archived(file_id, archive_path, archive_filesize):
                      'archive_filesize': archive_filesize})
 
 
+def check_session_keys_checksums(session_key_checksums):
+    """Check if this session key is (likely) already used."""
+    assert session_key_checksums, 'Eh? No checksum for the session keys?'
+    LOG.debug('Check if session keys (hash) are already used: %s', session_key_checksums)
+    with connection.cursor() as cur:
+        cur.execute('SELECT * FROM local_ega.check_session_keys_checksums_sha256(%(sk_checksums)s);',
+                    {'sk_checksums': session_key_checksums})
+        found = cur.fetchone()
+        LOG.debug("Check session keys: %s", found)
+        return (found and found[0])  # not none and check boolean value
+
+
 def mark_completed(file_id, session_key_checksums, digest_sha256):
     """Mark file as completed."""
     LOG.debug('Marking file_id %s with "COMPLETED"', file_id)
