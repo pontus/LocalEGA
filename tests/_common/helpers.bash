@@ -119,3 +119,84 @@ function get_user_passphrase {
     _get_user_info 2 $1
 }
 
+
+# Utility to ingest successfully a file
+
+function lega_generate_file {
+    local TESTFILE=$1
+    local TESTFILE_ENCRYPTED=$2
+    local size=$3 # in MB
+    local inputsource=${4:-/dev/urandom}
+
+    [ -n "${TESTUSER_SECKEY}" ]
+    [ -n "${TESTUSER_PASSPHRASE}" ]
+
+    # Generate a random file
+    export C4GH_PASSPHRASE=${TESTUSER_PASSPHRASE}
+    dd if=$inputsource bs=1048576 count=$size 2>/dev/null | \
+	crypt4gh encrypt --sk ${TESTUSER_SECKEY} --recipient_pk ${EGA_PUBKEY} 2>/dev/null > ${TESTFILE_ENCRYPTED}
+    unset C4GH_PASSPHRASE
+}
+
+function lega_upload {
+    local TESTFILE_ENCRYPTED=$1
+    local TESTFILE_UPLOADED=$2
+
+    [ -n "${TESTUSER}" ]
+    [ -n "${INBOX_PORT}" ]
+
+    LEGA_SFTP="sftp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ${INBOX_PORT}"
+    UPLOAD_CMD="put ${TESTFILE_ENCRYPTED} ${TESTFILE_UPLOADED}" # start with / or not ?
+    legarun ${LEGA_SFTP} ${TESTUSER}@localhost <<< ${UPLOAD_CMD}
+    [ "$status" -eq 0 ]
+}
+
+
+function lega_trigger_ingestion {
+    local user=$1
+    local upload_path=$2
+    local queue=$3
+    local attempts=$4
+    local delay=$5
+
+    [ -n "${user}" ]
+
+    # Fetch the correlation id for that file (Hint: with user/filepath combination)
+    retry_until 0 $attempts $delay ${MQ_GET_INBOX} "${user}" "${upload_path}"
+    [ "$status" -eq 0 ]
+    CORRELATION_ID=$output
+
+    # Publish the file to simulate a CentralEGA trigger
+    MESSAGE="{ \"user\": \"${user}\", \"filepath\": \"${upload_path}\"}"
+    legarun ${MQ_PUBLISH} --correlation_id "${CORRELATION_ID}" files "$MESSAGE"
+    [ "$status" -eq 0 ]
+
+    # Check that a message with the above correlation id arrived in the expected queue
+    # Waiting attemps * delay seconds.
+    retry_until 0 $attempts $delay ${MQ_FIND} $queue "${CORRELATION_ID}"
+    [ "$status" -eq 0 ]
+
+    # The message should contain the same info as the trigger message
+    [[ "$output" =~ "user: dummy" ]]
+    [[ "$output" =~ "filepath: ${upload_path}" ]]
+}
+
+
+function lega_ingest {
+    local TESTFILE=$1
+    local size=$2 # in MB
+    local queue=$3
+    local inputsource=${4:-/dev/urandom}
+
+    TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+
+    # Generate a random file
+    lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} $size $inputsource
+
+    # Upload it
+    lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}"
+    [ "$status" -eq 0 ]
+
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" $queue 30 10
+}

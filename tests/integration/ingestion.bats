@@ -73,9 +73,6 @@ function teardown() {
 # while the second one should be in the error queue
 
 @test "Do not ingest the same file twice" {
-    skip
-    # We skip it for the moment since the codebase is old
-    # and does not support this functionality
 
     TESTFILE=$(uuidgen)
     
@@ -93,14 +90,14 @@ function teardown() {
     CORRELATION_ID2=$output
     [ "$CORRELATION_ID" != "$CORRELATION_ID2" ]
 
-    # Publish the file to simulate a CentralEGA trigger
-    MESSAGE2="{ \"user\": \"${TESTUSER}\", \"filepath\": \"/${TESTFILE}.c4ga.2\"}"
-    legarun ${MQ_PUBLISH} --correlation_id ${CORRELATION_ID2} files "$MESSAGE2"
-    [ "$status" -eq 0 ]
+    # First time
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.completed 30 10
 
-    # Check that a message with the above correlation id arrived in the error queue
-    retry_until 0 10 10 ${MQ_GET} v1.files.error "${TESTUSER}" "/${TESTFILE}.c4ga.2"
-    [ "$status" -eq 0 ]
+    # Second time goes to error
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}.2" v1.files.error 30 10
+    [[ "$output" =~ "user: dummy" ]]
+    [[ "$output" =~ "filepath: ${upload_path}" ]]
+    [[ "$output" =~ "reason: Session key (likely) already used." ]]
 }
 
 # Ingesting a file not in Crypt4GH format
