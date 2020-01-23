@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
 #         Capture Errors             #
 ######################################
 
+
 def log_trace():
     """Locate the error."""
     exc_type, _, exc_tb = sys.exc_info()
