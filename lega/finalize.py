@@ -45,8 +45,6 @@ def main(args=None):
 
     CONF.setup(args)  # re-conf
 
-    broker = get_connection('broker')
-
     # upstream link configured in local broker
     consume(work, 'stableIDs', None)
 

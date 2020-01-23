@@ -127,7 +127,6 @@ def main(args=None):
 
     CONF.setup(args)  # re-conf
 
-    broker = get_connection('broker')
     archive = setup_archive()
     inbox = setup_inbox()
 
