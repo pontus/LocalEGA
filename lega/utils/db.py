@@ -142,15 +142,6 @@ def insert_file(filename, user_id):
         raise Exception('Database issue with insert_file')
 
 
-def get_errors(from_user=False):
-    """Retrieve error from database."""
-    query = 'SELECT * from local_ega.errors WHERE from_user = true;' if from_user else 'SELECT * from local_ega.errors;'
-    with connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(query)
-            return cur.fetchall()
-
-
 def set_error(file_id, error, from_user=False):
     """Store error related to ``file_id`` in database."""
     assert file_id, 'Eh? No file_id?'
