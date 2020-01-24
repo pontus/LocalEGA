@@ -86,7 +86,7 @@ The result is an image, named `nbisweden/ega-base`, and containing `python 3.6` 
 
 The following images are pulled from Docker Hub:
 
-* `nbisweden/ega-mq` (based on `rabbitmq:3.6.14-management`)
+* `nbisweden/ega-mq` (based on `rabbitmq:3.7.8-management`)
 * `nbisweden/ega-db` (based on `postgres:11.2`)
 * `nbisweden/ega-inbox` (based on OpenSSH version 7.8p1 and CentOS7)
 * `nbisweden/ega-mina-inbox` (based on Apache Mina)
