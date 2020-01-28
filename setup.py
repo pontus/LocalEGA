@@ -35,5 +35,13 @@ Users are handled throught Central EGA, directly.
           'PyYaml',
           'boto3',
           'requests',
-          'crypt4gh @ git+https://github.com/EGA-archive/crypt4gh.git@v1.1'
-      ])
+          'crypt4gh @ git+https://github.com/EGA-archive/crypt4gh.git@v1.1',
+          'tox'
+      ],
+      extras_require={
+          'test': ['pytest',
+                   'pytest-cov',
+                   'aioresponses',
+                   'testfixtures',
+                   'coveralls', 'coverage==4.5.4']}
+      )
