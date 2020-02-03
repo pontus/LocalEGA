@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
 load ../_common/helpers
-load ../_common/c4gh_generate
 
 # CEGA_CONNECTION and CEGA_USERS_CREDS should be already set,
 # when this script runs
@@ -53,33 +52,5 @@ function teardown() {
 
 @test "Ingest properly a test file" {
     
-    TESTFILE=toto #$(uuidgen)
-
-    [ -n "${TESTUSER}" ]
-    [ -n "${TESTUSER_SECKEY}" ]
-    [ -n "${TESTUSER_PASSPHRASE}" ]
-
-    legarun c4gh_generate 1 ${TESTFILES}/${TESTFILE} ${TESTUSER_SECKEY} ${TESTUSER_PASSPHRASE}
-    [ "$status" -eq 0 ]
-
-    # Upload it
-    UPLOAD_CMD="put ${TESTFILES}/${TESTFILE}.c4ga /${TESTFILE}.c4ga"
-    ${LEGA_SFTP} ${TESTUSER}@localhost <<< ${UPLOAD_CMD}
-    [ "$?" -eq 0 ]
-
-    # Fetch the correlation id for that file (Hint: with user/filepath combination)
-    retry_until 0 10 1 ${MQ_GET} v1.files.inbox "${TESTUSER}" "/${TESTFILE}.c4ga"
-    [ "$status" -eq 0 ]
-    CORRELATION_ID=$output
-
-    # Publish the file to simulate a CentralEGA trigger
-    MESSAGE="{ \"user\": \"${TESTUSER}\", \"filepath\": \"/${TESTFILE}.c4ga\"}"
-    legarun ${MQ_PUBLISH} --correlation_id ${CORRELATION_ID} files "$MESSAGE"
-    [ "$status" -eq 0 ]
-
-
-    # Check that a message with the above correlation id arrived in the expected queue
-    # Waiting 20 seconds.
-    retry_until 0 10 10 ${MQ_GET} v1.files.completed "${TESTUSER}" "/${TESTFILE}.c4ga"
-    [ "$status" -eq 0 ]
+    lega_ingest $(uuidgen) 1 v1.files.completed /dev/urandom
 }
