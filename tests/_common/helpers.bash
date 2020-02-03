@@ -32,6 +32,7 @@ cp -f ${MAIN_REPO}/deploy/private/config/certs/root.ca.crt ${HERE}/mq/.
 MQ_CONSUME="python ${HERE}/mq/consume.py --connection ${CEGA_CONNECTION}"
 MQ_FIND="python ${HERE}/mq/find.py --connection ${CEGA_CONNECTION}"
 MQ_GET="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION}"
+MQ_GET_INBOX="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.inbox"
 MQ_PUBLISH="python ${HERE}/mq/publish.py --connection ${CEGA_CONNECTION}"
 
 # Convenience function to capture _all_ outputs
