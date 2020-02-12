@@ -1,8 +1,7 @@
 import unittest
-from lega.ingest import main, work
+from lega.ingest import work, main
 from unittest import mock
 from testfixtures import tempdir
-# from pathlib import PosixPath
 from . import c4gh_data
 from lega.utils.exceptions import FromUser
 
@@ -14,9 +13,8 @@ class testIngest(unittest.TestCase):
     """
 
     @mock.patch('lega.ingest.getattr')
-    @mock.patch('lega.ingest.get_connection')
     @mock.patch('lega.ingest.consume')
-    def test_main(self, mock_consume, mock_connection, mock_getattr):
+    def test_main(self, mock_consume, mock_getattr):
         """Test main verify, by mocking cosume call."""
         mock_consume.return_value = mock.MagicMock()
         main()
@@ -37,12 +35,12 @@ class testIngest(unittest.TestCase):
         mock_broker.channel.return_value = mock.Mock()
         infile = filedir.write('infile.in', bytearray.fromhex(c4gh_data.ENC_FILE))
         data = {'filepath': infile, 'user': 'user_id@elixir-europe.org'}
-        result = work(store, store, mock_broker, data)
-        mocked = {'filepath': infile, 'user': 'user_id@elixir-europe.org',
-                  'file_id': 32,
-                  'org_msg': {'filepath': infile, 'user': 'user_id@elixir-europe.org'},
-                  'header': '686561646572',
-                  'archive_path': 'smth'}
+        result = work(store, mock_broker, data)
+        mocked = ({'filepath': infile, 'user': 'user_id@elixir-europe.org',
+                   'file_id': 32,
+                   'org_msg': {'filepath': infile, 'user': 'user_id@elixir-europe.org'},
+                   'header': '686561646572',
+                   'archive_path': 'smth'}, False)
         self.assertEqual(mocked, result)
         filedir.cleanup()
 
@@ -64,14 +62,13 @@ class testIngest(unittest.TestCase):
 
         data = {'filepath': infile, 'user': 'user_id@elixir-europe.org'}
         result = work(store, mock_broker, data)
-        self.assertEqual(None, result)
+        self.assertEqual((None, True), result)
         filedir.cleanup()
 
     @tempdir()
     @mock.patch('lega.ingest.get_header')
     @mock.patch('lega.ingest.db')
-    @mock.patch('lega.utils.db.set_error')
-    def test_mark_in_progress_fail(self, mock_set_error, mock_db, mock_header, filedir):
+    def test_mark_in_progress_fail(self, mock_db, mock_header, filedir):
         """Test ingest worker, mark_in_progress fails."""
         # Mocking a lot of stuff, as it is previously tested
         mock_header.return_value = b'header'
@@ -86,17 +83,13 @@ class testIngest(unittest.TestCase):
 
         data = {'filepath': infile, 'user': 'user_id@elixir-europe.org'}
         result = work(store, store, mock_broker, data)
-        self.assertEqual(None, result)
-        mock_set_error.assert_called()
+        self.assertEqual((None, True), result)
         filedir.cleanup()
 
     @tempdir()
     @mock.patch('lega.ingest.get_header')
     @mock.patch('lega.ingest.db')
-    @mock.patch('lega.utils.db.set_error')
-    @mock.patch('lega.utils.db.get_connection')
-    @mock.patch('lega.utils.db.publish')
-    def test_mark_in_progress_fail_with_from_user_error(self, mock_publish, mock_get_connection, mock_set_error, mock_db, mock_header, filedir):
+    def test_mark_in_progress_fail_with_from_user_error(self, mock_db, mock_header, filedir):
         """Test ingest worker, mark_in_progress fails."""
         # Mocking a lot of stuff, as it is previously tested
         mock_header.return_value = b'header'
@@ -111,8 +104,5 @@ class testIngest(unittest.TestCase):
 
         data = {'filepath': infile, 'user': 'user_id@elixir-europe.org'}
         result = work(store, store, mock_broker, data)
-        self.assertEqual(None, result)
-        mock_set_error.assert_called()
-        mock_publish.assert_called()
-        mock_get_connection.assert_called()
+        self.assertEqual((None, True), result)
         filedir.cleanup()

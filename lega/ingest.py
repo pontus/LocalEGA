@@ -25,8 +25,8 @@ import io
 from crypt4gh import header
 
 from .conf import CONF
-from .utils import db, exceptions, sanitize_user_id, storage
-from .utils.amqp import consume, get_connection
+from .utils import db, exceptions, errors, sanitize_user_id, storage
+from .utils.amqp import consume
 
 LOG = logging.getLogger(__name__)
 
@@ -43,9 +43,8 @@ def get_header(input_file):
     # return header.serialize(header_packets)
 
 
-@db.catch_error
-@db.crypt4gh_to_user_errors
-def work(fs, inbox_fs, channel, data):
+@errors.catch(ret_on_error=(None, True))
+def work(fs, inbox_fs, data):
     """Read a message, split the header and send the remainder to the backend store."""
     filepath = data['filepath']
     LOG.info('Processing %s', filepath)
@@ -93,7 +92,7 @@ def work(fs, inbox_fs, channel, data):
         data['archive_path'] = target
 
     LOG.debug("Reply message: %s", data)
-    return data
+    return (data, False)
 
 
 def setup_archive():
@@ -128,14 +127,13 @@ def main(args=None):
 
     CONF.setup(args)  # re-conf
 
-    broker = get_connection('broker')
     archive = setup_archive()
     inbox = setup_inbox()
 
-    do_work = partial(work, archive, inbox, broker.channel())
+    do_work = partial(work, archive, inbox)
 
     # upstream link configured in local broker
-    consume(do_work, broker, 'files', 'archived')
+    consume(do_work, 'files', 'archived')
 
 
 if __name__ == '__main__':

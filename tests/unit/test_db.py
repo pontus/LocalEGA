@@ -1,114 +1,53 @@
 import unittest
-from lega.utils.db import (insert_file,
-                           get_errors, set_error,
-                           get_info,
-                           store_header, set_archived,
-                           mark_in_progress, mark_completed,
-                           set_stable_id,
-                           connect)
+from lega.utils.db import DBConnection
 from unittest import mock
-import asyncio
 
 
-class DBTest(unittest.TestCase):
-    """Database.
+class TestDBConnection(unittest.TestCase):
+    """DBConnection.
 
-    Testing database actions.
-    """
+    Testing DBConnection."""
 
     def setUp(self):
         """Initialise fixtures."""
-        self._loop = asyncio.get_event_loop()
-        self._query_result = [("example", "result"), ("more", "results")]
+        self._db = DBConnection()
 
-    @mock.patch('lega.utils.amqp.CONF')
+    def tearDown(self):
+        """Close DB connection."""
+        self._db.close()
+
     @mock.patch('lega.utils.db.psycopg2')
-    def test_connect(self, mock_db_connect, mock_conf):
+    def test_connect(self, mock_db_connect):
         """Test that connection is returning a connection."""
-
-        # For CONF.get_value(....)
-        def values(domain, value, conv=str, default=None, raw=True):
-            if value == 'connection':
-                return r'postgresql://user:passwd@db:5432/lega'
-            else:
-                pass
-        mock_conf.get_value = mock.MagicMock(side_effect=values)
-
-        connect()
+        self._db.connect()
         mock_db_connect.connect.assert_called()
 
-    @mock.patch('lega.utils.db.connect')
-    def test_insert(self, mock_connect):
-        """DB insert."""
-        mock_connect().__enter__().cursor().__enter__().fetchone.return_value = self._query_result
-        result = insert_file('filename', 'user_id')
-        assert result == ("example", "result")
+    @mock.patch('lega.utils.db.psycopg2')
+    def test_cursor(self, mock_db_connect):
+        """Test that cursor is executed."""
+        with self._db.cursor():
+            mock_db_connect.connect().cursor().__enter__().execute.assert_called()
 
-    @mock.patch('lega.utils.db.connect')
-    def test_insert_fail(self, mock_connect):
-        """DB insert."""
-        mock_connect().__enter__().cursor().__enter__().fetchone.return_value = [()]
-        with self.assertRaises(Exception):
-            insert_file('filename', 'user_id', 'stable_id')
+    @mock.patch('lega.utils.db.psycopg2')
+    def test_close(self, mock_db_connect):
+        """Test that cursor is returning a connection."""
+        self._db.close()
+        self.assertEqual(self._db.curr, None)
+        self.assertEqual(self._db.conn, None)
 
-    @mock.patch('lega.utils.db.connect')
-    def test_get_errors(self, mock_connect):
-        """DB get errors."""
-        mock_connect().__enter__().cursor().__enter__().fetchall.return_value = self._query_result
-        result = get_errors()
-        assert result == self._query_result
+    @mock.patch('lega.utils.db.CONF')
+    @mock.patch('lega.utils.db.psycopg2')
+    def test_connects(self, mock_db_connect, mock_conf):
+        """Test that connection is returning a connection."""
+        # For CONF.get_value(....)
+        def values(domain, value, conv=str, default=None, raw=True):
+            d = {
+                'connection': r'postgresql://user:passwd@db:5432/lega',
+                'interval': 10,
+                'attempts': 30
+            }
+            return d.get(value, default)
+        mock_conf.get_value = mock.MagicMock(side_effect=values)
 
-    @mock.patch('lega.utils.db.connect')
-    def test_get_details(self, mock_connect):
-        """DB get details."""
-        mock_connect().__enter__().cursor().__enter__().fetchone.return_value = self._query_result
-        result = get_info('file_id')
-        assert result[0] == ("example", "result")
-
-    # Just need to verify that the cursor is called with execute
-    # assert_called_with() can be used to verify the query passed
-
-    @mock.patch('lega.utils.db.connect')
-    def test_set_error(self, mock_connect):
-        """DB set error."""
-        error = mock.Mock()
-        error.__cause__ = mock.MagicMock(name='__cause__')
-        error.__cause__.return_value = 'something'
-        set_error('file_id', error)
-        mock_connect().__enter__().cursor().__enter__().execute.assert_called()
-
-    @mock.patch('lega.utils.db.connect')
-    def test_store_header(self, mock_connect):
-        """DB set progress."""
-        # Values are not important in this call
-        store_header("file_id", b'header')
-        mock_connect().__enter__().cursor().__enter__().execute.assert_called()
-
-    @mock.patch('lega.utils.db.connect')
-    def test_set_archived(self, mock_connect):
-        """DB set progress."""
-        # Values are not important in this call
-        set_archived("file_id", '/ega/archive/000/000/0a1', 1000)
-        mock_connect().__enter__().cursor().__enter__().execute.assert_called()
-
-    @mock.patch('lega.utils.db.connect')
-    def test_mark_in_progress(self, mock_connect):
-        """DB mark in progress."""
-        # Values are not important in this call
-        mark_in_progress('file_id')
-        mock_connect().__enter__().cursor().__enter__().execute.assert_called()
-
-    @mock.patch('lega.utils.db.connect')
-    def test_mark_completed(self, mock_connect):
-        """DB mark completed."""
-        # Values are not important in this call
-        mark_completed('file_id')
-        mock_connect().__enter__().cursor().__enter__().execute.assert_called()
-
-    @mock.patch('lega.utils.db.connect')
-    def test_set_stable_id(self, mock_connect):
-        """DB mark completed."""
-        # Values are not important in this call
-        set_stable_id("file_id", 'EGAF00001')
-        mock_connect().__enter__().cursor().__enter__().execute.assert_called()
-
+        self._db.ping()
+        mock_db_connect.connect.assert_called()

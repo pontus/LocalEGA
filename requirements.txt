@@ -1,5 +1,5 @@
 git+https://github.com/EGA-archive/crypt4gh.git@v1.1
-pika==1.0.1
+pika==1.1.0
 aiohttp==3.3.2
 sphinx_rtd_theme
 psycopg2==2.8.4
@@ -27,3 +27,4 @@ snowballstemmer==1.2.1
 Sphinx==1.8.4
 sphinxcontrib-websupport==1.1.0
 urllib3==1.24.2
+tox
