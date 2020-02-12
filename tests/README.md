@@ -16,8 +16,8 @@ These tests treat the system as a black box, only checking the expected output f
 - [x] Ingesting a directory with multiple files and/or subdirectories<br/>
       Expected outcome: Messages in the CentralEGA completed queue
 
-- [x] (skipped) Upload 2 files encrypted with same session key<br/>
-	  Expected outcome: Message in the CentralEGA user-error queue for the second file
+- [x] Upload 2 files encrypted with same session key<br/>
+	Expected outcome: Message in the CentralEGA user-error queue for the second file
 
 - [x] (skipped) Use 2 stable IDs for the same ingested file<br/>
       Expected outcome: Error captured (where?)

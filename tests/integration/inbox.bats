@@ -79,7 +79,7 @@ function teardown() {
 # but the file was removed from the inbox
 # We should receive a message in the error queue
 
-@test "Ingestion of ghost file goes to error" {
+@test "Ingestion of missing file goes to error" {
 
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
@@ -108,30 +108,6 @@ function teardown() {
 
     # Check that a message with the above correlation id arrived in the expected queue
     retry_until 0 30 2 ${MQ_FIND} v1.files.error "${CORRELATION_ID}"
-    [ "$status" -eq 0 ]
-
-}
-
-
-# File not found in inbox
-# -----------------------
-#
-# We upload a file, trigger an ingestion
-# but the file was removed from the inbox
-# We should receive a message in the error queue
-
-@test "File not found goes to error" {
-
-    CORRELATION_ID=$(uuidgen)
-
-    # Publish the file to simulate a CentralEGA trigger
-    MESSAGE="{ \"user\": \"${TESTUSER}\", \"filepath\": \"non.existing.file\"}"
-    legarun ${MQ_PUBLISH} --correlation_id ${CORRELATION_ID} files "$MESSAGE"
-    [ "$status" -eq 0 ]
-
-    # Check that a message with the above correlation id arrived in the expected queue
-    # Waiting 20 seconds.
-    retry_until 0 10 2 ${MQ_FIND} v1.files.error "${CORRELATION_ID}"
     [ "$status" -eq 0 ]
 
 }
