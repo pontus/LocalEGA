@@ -25,12 +25,16 @@ import configparser
 from logging.config import fileConfig, dictConfig
 from pathlib import Path
 import yaml
+from yaml import SafeLoader as sf
 
 _here = Path(__file__).parent
 _config_files = [
     _here / 'defaults.ini',
     '/etc/ega/conf.ini'
 ]
+
+
+sf.add_constructor('tag:yaml.org,2002:python/tuple', lambda self, node: tuple(sf.construct_sequence(self, node)))
 
 
 class Configuration(configparser.ConfigParser):
@@ -69,7 +73,7 @@ class Configuration(configparser.ConfigParser):
         _logger = _here / f'loggers/{filename}.yaml'
         if _logger.exists():
             with open(_logger, 'r') as stream:
-                dictConfig(yaml.safe_load(stream))
+                dictConfig(yaml.load(stream, Loader=sf))
                 self.log_conf = _logger
                 return
 
@@ -83,7 +87,7 @@ class Configuration(configparser.ConfigParser):
 
         if filename.suffix in ('.yaml', '.yml'):
             with open(filename, 'r') as stream:
-                dictConfig(yaml.safe_load(stream))
+                dictConfig(yaml.load(stream, Loader=sf))
                 self.log_conf = filename
                 return
 
