@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from lega import __version__
 
 setup(name='lega',
@@ -15,7 +15,7 @@ message broker and a database.
 
 Users are handled throught Central EGA, directly.
 ''',
-      packages=['lega', 'lega/utils', 'lega/conf'],
+      packages=find_packages(),
       include_package_data=False,
       package_data={'lega': ['conf/loggers/*.yaml', 'conf/defaults.ini']},
       zip_safe=False,
