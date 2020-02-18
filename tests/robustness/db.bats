@@ -1,8 +1,6 @@
 #!/usr/bin/env bats
 
 load ../_common/helpers
-load ../_common/c4gh_generate
-load ../_common/ingest
 
 # CEGA_CONNECTION and CEGA_USERS_CREDS should be already set,
 # when this script runs
@@ -43,65 +41,66 @@ function teardown() {
     [[ -n "${SSH_AGENT_PID}" ]] && kill -TERM "${SSH_AGENT_PID}"
 }
 
+
 # Ingestion after db restart
 # --------------------------
 # Ingest a file, stop db, start db, ingest another file
 
 @test "Ingestion after db restart" {
-    skip "Used after the update for DB connection retries"
 
-    lega_ingest $(uuidgen) 1 v1.files.completed
-    legarun docker stop localega-db.default
-    legarun docker start localega-db.default
-    legarun sleep 15
-    lega_ingest $(uuidgen) 1 v1.files.completed
+    lega_ingest $(uuidgen) 1 v1.files.completed /dev/zero
 
+    run docker stop localega-db.default
+    run docker start localega-db.default
+    [ "$status" -eq 0 ]
+    #sleep 15
+
+    lega_ingest $(uuidgen) 1 v1.files.completed /dev/zero
 }
+
 
 # DB restart in the middle of ingestion
 # -------------------------------------
 
 @test "DB restart in the middle of ingestion" {
-    # skip "Used after the update for DB connection retries"
 
     TESTFILE=$(uuidgen)
-    [ -n "${TESTUSER}" ]
-    [ -n "${TESTUSER_SECKEY}" ]
-    [ -n "${TESTUSER_PASSPHRASE}" ]
+    TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
 
     # Stop the verify component, so only ingest works
-    legarun docker stop verify.default
+    run docker stop verify
 
-    # Create a random file Crypt4GH file of 1 MB
-    legarun c4gh_generate 1 ${TESTFILES}/${TESTFILE} ${TESTUSER_SECKEY} ${TESTUSER_PASSPHRASE}
-    [ "$status" -eq 0 ]
+    # Generate a Crypt4GH file of 1 MB
+    lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} 1 /dev/zero
 
     # Upload it
-    UPLOAD_CMD="put ${TESTFILES}/${TESTFILE}.c4ga /${TESTFILE}.c4ga"
-    legarun ${LEGA_SFTP} -i ${TESTDATA_DIR}/${TESTUSER}.sec ${TESTUSER}@localhost <<< ${UPLOAD_CMD}
+    lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}"
     [ "$status" -eq 0 ]
 
+
     # Fetch the correlation id for that file (Hint: with user/filepath combination)
-    retry_until 0 100 1 ${MQ_GET} v1.files.inbox "${TESTUSER}" "/${TESTFILE}.c4ga"
+    retry_until 0 100 1 ${MQ_GET_INBOX} "${TESTUSER}" "${TESTFILE_UPLOADED}"
     [ "$status" -eq 0 ]
     CORRELATION_ID=$output
 
     # Publish the file to simulate a CentralEGA trigger
-    MESSAGE="{ \"user\": \"${TESTUSER}\", \"filepath\": \"/${TESTFILE}.c4ga\"}"
+    MESSAGE="{ \"user\": \"${TESTUSER}\", \"filepath\": \"/${TESTFILE}.c4gh\"}"
     legarun ${MQ_PUBLISH} --correlation_id ${CORRELATION_ID} files "$MESSAGE"
     [ "$status" -eq 0 ]
 
-
     # Restart database
-    legarun docker stop localega-db.default
-    legarun docker start localega-db.default
-    legarun sleep 15
+    run docker stop localega-db.default
+    run docker start localega-db.default
+    [ "$status" -eq 0 ]
+    sleep 15
 
     # Restart verify
-    legarun docker restart verify.default
-    legarun sleep 15
+    run docker restart verify.default
+    [ "$status" -eq 0 ]
+    sleep 15
 
     # Check that a message with the above correlation id arrived in the expected queue
-    retry_until 0 10 2 ${MQ_GET} v1.files.completed "${TESTUSER}" "/${TESTFILE}.c4ga"
+    retry_until 0 20 2 ${MQ_FIND} v1.files.completed "${CORRELATION_ID}"
     [ "$status" -eq 0 ]
 }

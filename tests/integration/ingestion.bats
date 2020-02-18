@@ -1,8 +1,6 @@
 #!/usr/bin/env bats
 
 load ../_common/helpers
-load ../_common/c4gh_generate
-load ../_common/ingest
 
 # CEGA_CONNECTION and CEGA_USERS_CREDS should be already set,
 # when this script runs
@@ -73,34 +71,25 @@ function teardown() {
 # while the second one should be in the error queue
 
 @test "Do not ingest the same file twice" {
-    skip
-    # We skip it for the moment since the codebase is old
-    # and does not support this functionality
-
     TESTFILE=$(uuidgen)
-    
+    TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+
+    # generate a file
+    lega_generate_file "${TESTFILE}" "${TESTFILE_ENCRYPTED}" 1 /dev/urandom
+
+    # Upload twice
+    lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}"
+    lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}.2"
+
     # First time
-    lega_ingest ${TESTFILE} 1 v1.files.completed
-
-    # Second time
-    UPLOAD_CMD="put ${TESTFILES}/${TESTFILE}.c4ga /${TESTFILE}.c4ga.2"
-    legarun ${LEGA_SFTP} ${TESTUSER}@localhost <<< ${UPLOAD_CMD}
-    [ "$status" -eq 0 ]
-
-    # Fetch the correlation id for that file (Hint: with user/filepath combination)
-    retry_until 0 100 1 ${MQ_GET} v1.files.inbox "${TESTUSER}" "/${TESTFILE}.c4ga.2"
-    [ "$status" -eq 0 ]
-    CORRELATION_ID2=$output
-    [ "$CORRELATION_ID" != "$CORRELATION_ID2" ]
-
-    # Publish the file to simulate a CentralEGA trigger
-    MESSAGE2="{ \"user\": \"${TESTUSER}\", \"filepath\": \"/${TESTFILE}.c4ga.2\"}"
-    legarun ${MQ_PUBLISH} --correlation_id ${CORRELATION_ID2} files "$MESSAGE2"
-    [ "$status" -eq 0 ]
-
-    # Check that a message with the above correlation id arrived in the error queue
-    retry_until 0 10 10 ${MQ_GET} v1.files.error "${TESTUSER}" "/${TESTFILE}.c4ga.2"
-    [ "$status" -eq 0 ]
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.completed 30 10
+    
+    # Second time goes to error
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}.2" v1.files.error 30 10
+    [[ "$output" =~ "user: dummy" ]]
+    [[ "$output" =~ "filepath: ${upload_path}" ]]
+    [[ "$output" =~ "reason: Session key (likely) already used." ]]
 }
 
 # Ingesting a file not in Crypt4GH format
@@ -111,33 +100,22 @@ function teardown() {
 
 @test "Do not ingest a file not in Crypt4GH format" {
     TESTFILE=$(uuidgen)
+    TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
 
     # Create a random file of 1 MB
     legarun dd if=/dev/urandom of=${TESTFILES}/${TESTFILE} count=1 bs=1048576
     [ "$status" -eq 0 ]
 
     # Encrypt it with AES
-    legarun openssl enc -aes-256-cbc -e -in ${TESTFILES}/${TESTFILE} -out ${TESTFILES}/${TESTFILE}.c4ga -k 'secretpassword'
+    legarun openssl enc -aes-256-cbc -e -in ${TESTFILES}/${TESTFILE} -out ${TESTFILE_ENCRYPTED} -k 'secretpassword'
     [ "$status" -eq 0 ]
 
     # Upload it
-    UPLOAD_CMD="put ${TESTFILES}/${TESTFILE}.c4ga /${TESTFILE}.c4ga"
-    legarun ${LEGA_SFTP} ${TESTUSER}@localhost <<< ${UPLOAD_CMD}
-    [ "$status" -eq 0 ]
+    lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}"
 
-    # Fetch the correlation id for that file (Hint: with user/filepath combination)
-    retry_until 0 100 1 ${MQ_GET} v1.files.inbox "${TESTUSER}" "/${TESTFILE}.c4ga"
-    [ "$status" -eq 0 ]
-    CORRELATION_ID=$output
-
-    # Publish the file to simulate a CentralEGA trigger
-    MESSAGE="{ \"user\": \"${TESTUSER}\", \"filepath\": \"/${TESTFILE}.c4ga\"}"
-    legarun ${MQ_PUBLISH} --correlation_id ${CORRELATION_ID} files "$MESSAGE"
-    [ "$status" -eq 0 ]
-
-    # Check that a message with the above correlation id arrived in the completed queue
-    retry_until 0 10 10 ${MQ_GET} v1.files.error "${TESTUSER}" "/${TESTFILE}.c4ga"
-    [ "$status" -eq 0 ]
+    # ingest goes to error
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.error 30 10
 }
 
 # Ingesting a file from a subdirectory

@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
 load ../_common/helpers
-load ../_common/c4gh_generate
 
 # CEGA_CONNECTION and CEGA_USERS_CREDS should be already set,
 # when this script runs
@@ -80,34 +79,35 @@ function teardown() {
 # but the file was removed from the inbox
 # We should receive a message in the error queue
 
-@test "File not found in inbox goes to error" {
+@test "Ingestion of missing file goes to error" {
 
     TESTFILE=$(uuidgen)
+    TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
 
-    legarun c4gh_generate 1 ${TESTFILES}/${TESTFILE} ${TESTUSER_SECKEY} ${TESTUSER_PASSPHRASE}
-    [ "$status" -eq 0 ]
-    
+    # Generate a file
+    lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} 1 /dev/zero
+
     # Upload it
-    legarun ${LEGA_SFTP} -i ${TESTDATA_DIR}/${TESTUSER}.sec ${TESTUSER}@localhost <<< $"put ${TESTFILES}/${TESTFILE}.c4ga ${TESTFILE}.c4ga"
+    lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}"
     [ "$status" -eq 0 ]
 
     # Fetch the correlation id for that file (Hint: with user/filepath combination)
-    retry_until 0 100 1 ${MQ_GET} v1.files.inbox "${TESTUSER}" "/${TESTFILE}.c4ga"
+    retry_until 0 100 1 ${MQ_GET_INBOX} "${TESTUSER}" "${TESTFILE_UPLOADED}"
     [ "$status" -eq 0 ]
     CORRELATION_ID=$output
 
     # Remove the file
-    legarun ${LEGA_SFTP} -i ${TESTDATA_DIR}/${TESTUSER}.sec ${TESTUSER}@localhost <<< $"rm /${TESTFILE}.c4ga"
+    legarun ${LEGA_SFTP} ${TESTUSER}@localhost <<< $"rm ${TESTFILE_UPLOADED}"
     [ "$status" -eq 0 ]
 
     # Publish the file to simulate a CentralEGA trigger
-    MESSAGE="{ \"user\": \"${TESTUSER}\", \"filepath\": \"/${TESTFILE}.c4ga\"}"
-    legarun ${MQ_PUBLISH} --correlation_id ${CORRELATION_ID} files "$MESSAGE"
+    MESSAGE="{ \"user\": \"${TESTUSER}\", \"filepath\": \"${TESTFILE_UPLOADED}\"}"
+    legarun ${MQ_PUBLISH} --correlation_id "${CORRELATION_ID}" files "$MESSAGE"
     [ "$status" -eq 0 ]
 
     # Check that a message with the above correlation id arrived in the expected queue
-    # Waiting 20 seconds.
-    retry_until 0 10 2 ${MQ_GET} v1.files.error "${TESTUSER}" "/${TESTFILE}.c4ga"
+    retry_until 0 30 2 ${MQ_FIND} v1.files.error "${CORRELATION_ID}"
     [ "$status" -eq 0 ]
 
 }

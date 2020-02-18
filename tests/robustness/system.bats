@@ -1,11 +1,13 @@
 #!/usr/bin/env bats
 
 load ../_common/helpers
-load ../_common/c4gh_generate
-load ../_common/ingest
 
 # CEGA_CONNECTION and CEGA_USERS_CREDS should be already set,
 # when this script runs
+
+# The name of the testfile can be ${BATS_TEST_NAME}, however, multiple runs of the testsuite
+# would produce multiple message in the queues and the MQ_GET/MQ_FIND would get confused.
+# We therefore use a uuid name, which can later be updated back to ${BATS_TEST_NAME}
 
 function setup() {
 
@@ -33,7 +35,6 @@ function setup() {
     # legarun docker port inbox 9000
     # [ "$status" -eq 0 ]
     # INBOX_PORT=${output##*:}
-    LEGA_SFTP="sftp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ${INBOX_PORT}"
 }
 
 function teardown() {
@@ -48,14 +49,13 @@ function teardown() {
 # Ingest a file, restart every component, ingest another file
 
 @test "Whole system restart" {
-    skip "Used after the update for notification connection retries"
 
-    lega_ingest $(uuidgen) 1 v1.files.completed
+    lega_ingest $(uuidgen) 10 v1.files.completed /dev/urandom
 
-    pushd ../deploy
+    pushd ${DOCKER_PATH}
     legarun docker-compose restart
-    legarun sleep 20
+    legarun make preflight-check
     popd
 
-    lega_ingest $(uuidgen) 2 v1.files.completed
+    lega_ingest $(uuidgen) 10 v1.files.completed /dev/urandom
 }
