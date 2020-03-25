@@ -310,7 +310,7 @@ services:
     hostname: mq${HOSTNAME_DOMAIN}
     ports:
       - "${DOCKER_PORT_mq}:15672"
-    image: nbisweden/ega-mq:latest
+    image: neicnordic/sda-mq:latest
     container_name: localega-mq-server${HOSTNAME_DOMAIN}
     labels:
         lega_label: "localega-mq-server"
@@ -337,9 +337,9 @@ services:
     container_name: localega-db${HOSTNAME_DOMAIN}
     labels:
         lega_label: "localega-db"
-    image: nbisweden/ega-db:latest
+    image: neicnordic/sda-db:latest
     volumes:
-      - db:/ega/data
+      - db:/ega
       - ./config/certs/db.ca.crt:/tls/db.ca.crt
       - ./config/certs/db.ca.key:/tls/db.ca.key:ro
       - ./config/certs/root.ca.crt:/tls/root.ca.crt
@@ -374,7 +374,7 @@ cat >> ${PRIVATE}/lega.yml <<EOF
       - USE_SSL=true
     ports:
       - "${DOCKER_PORT_inbox}:2222"
-    image: nbisweden/ega-mina-inbox
+    image: neicnordic/sda-inbox-sftp
     volumes:
       - inbox:/ega/inbox
       - ./config/certs/htsget.p12:/ega/tls/inbox.p12
@@ -418,7 +418,7 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     depends_on:
       - localega-db
       - localega-mq-server
-    image: nbisweden/ega-base:latest
+    image: neicnordic/sda-base:latest
     container_name: ingest${HOSTNAME_DOMAIN}
     labels:
         lega_label: "ingest"
@@ -459,7 +459,7 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     container_name: verify${HOSTNAME_DOMAIN}
     labels:
         lega_label: "verify"
-    image: nbisweden/ega-base:latest
+    image: neicnordic/sda-base:latest
     environment:
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_SECRET_KEY=${S3_SECRET_KEY}
@@ -494,7 +494,7 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     depends_on:
       - localega-db
       - localega-mq-server
-    image: nbisweden/ega-base:latest
+    image: neicnordic/sda-base:latest
     container_name: finalize${HOSTNAME_DOMAIN}
     labels:
         lega_label: "finalize"
@@ -587,7 +587,7 @@ services:
     hostname: cega-users${HOSTNAME_DOMAIN}
     ports:
       - "15671:443"
-    image: nbisweden/ega-base:latest
+    image: neicnordic/sda-base:latest
     container_name: cega-users${HOSTNAME_DOMAIN}
     labels:
         lega_label: "cega-users"

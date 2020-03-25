@@ -44,7 +44,7 @@ jobs:
                      --build-arg LEGA_GID=1000 \
                      --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
                      --build-arg SOURCE_COMMIT=$(git rev-parse --short HEAD) \
-                     --tag nbisweden/ega-base:latest \
+                     --tag neicnordic/sda-base:latest \
                      .
     - name: Bootstrap with backend '${{ matrix.backend }}' and Start Services
       run: |
