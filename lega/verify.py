@@ -173,7 +173,6 @@ def main(args=None):
     # We don't use default values: bark if not supplied
     key_section = CONF.get_value('DEFAULT', 'master_key')
     key_loader = getattr(key, CONF.get_value(key_section, 'loader_class'))
-    key_config = CONF[key_section]  # the whole section
 
     path = None
     if store is storage.FileStorage:
@@ -183,7 +182,7 @@ def main(args=None):
         # we retrieve the s3 bucket name for the archive
         path = CONF.get_value('archive', 's3_bucket')
 
-    do_work = partial(work, key_loader(key_config), store('archive', path))
+    do_work = partial(work, key_loader(key_section), store('archive', path))
 
     consume(do_work, 'archived', 'completed')
 
