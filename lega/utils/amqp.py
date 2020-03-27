@@ -32,14 +32,37 @@ class AMQPConnection():
     def fetch_args(self):
         """Retrieve AMQP connection parameters."""
         LOG.info('Getting a connection to %s', self.conf_section)
-        params = CONF.get_value(self.conf_section, 'connection', raw=True)
 
-        LOG.debug("Initializing a connection to: %s", params)
-        self.connection_params = pika.connection.URLParameters(params)
+        use_ssl = CONF.get_value(self.conf_section, 'ssl', default="no", conv=bool)
+        LOG.debug("SSL Value from conf system: %s", type(use_ssl))
+
+        # First try to get the config with URLParameters
+        params = CONF.get_value(self.conf_section, 'connection', raw=True)
+        if params:
+            LOG.debug("Initializing a connection to: %s", params)
+            self.connection_params = pika.connection.URLParameters(params)
+            if params.startswith('amqps'):
+                LOG.debug("Params have amqps, enabling ssl")
+                use_ssl = True
+        else:
+            self.connection_params = pika.connection.ConnectionParameters(
+                host=CONF.get_value(self.conf_section, 'hostname'),
+                port=CONF.get_value(self.conf_section, 'port'),
+                virtual_host=CONF.get_value(self.conf_section, 'virtual_host'),
+                connection_attempts=CONF.get_value(self.conf_section, 'connection_attempts', default=30),
+                heartbeat=CONF.get_value(self.conf_section, 'heartbeat', default=0),
+                retry_delay=CONF.get_value(self.conf_section, 'retry_delay', default=10),
+                credentials=pika.credentials.PlainCredentials(
+                    username=CONF.get_value(self.conf_section, 'username'),
+                    password=CONF.get_value(self.conf_section, 'password')
+                )
+            )
 
         # Handling the SSL options
         # Note: We re-create the SSL context, so don't pass any ssl_options in the above connection URI.
-        if params.startswith('amqps'):
+        LOG.debug("SSL before if: %s", use_ssl)
+        if use_ssl:
+            LOG.debug("SSL after if: %s", use_ssl)
 
             LOG.debug("Enforcing a TLS context")
             context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)  # Enforcing (highest) TLS version (so... 1.2?)
@@ -54,11 +77,11 @@ class AMQPConnection():
                     context.load_verify_locations(cafile=cacertfile)
 
             # Check the server's hostname
-            server_hostname = CONF.get_value(self.conf_section, 'server_hostname', default=None)
+            hostname = CONF.get_value(self.conf_section, 'hostname', default=None)
             verify_hostname = CONF.get_value(self.conf_section, 'verify_hostname', conv=bool, default=False)
             if verify_hostname:
                 LOG.debug("Require hostname verification")
-                assert server_hostname, "server_hostname must be set if verify_hostname is"
+                assert hostname, "hostname must be set if verify_hostname is"
                 context.check_hostname = True
                 context.verify_mode = ssl.CERT_REQUIRED
 
@@ -70,7 +93,7 @@ class AMQPConnection():
                 context.load_cert_chain(certfile, keyfile=keyfile)
 
             # Finally, the pika ssl options
-            self.connection_params.ssl_options = pika.SSLOptions(context=context, server_hostname=server_hostname)
+            self.connection_params.ssl_options = pika.SSLOptions(context=context, server_hostname=hostname)
 
     def connect(self, force=False):
         """Make a blocking/select connection to the Message Broker supporting AMQP(S)."""
