@@ -203,21 +203,6 @@ DB_CONNECTION="postgres://lega_in:${DB_LEGA_IN_PASSWORD}@localega-db${HOSTNAME_D
 cat >> ${PRIVATE}/conf.ini <<EOF
 
 ## Connecting to Local EGA
-[broker]
-connection = ${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
-
-enable_ssl = yes
-verify_peer = yes
-verify_hostname = no
-
-cacertfile = /etc/ega/CA.cert
-certfile = /etc/ega/ssl.cert
-keyfile = /etc/ega/ssl.key
-
-[db]
-connection = ${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
-try = 30
-try_interval = 1
 
 [archive]
 EOF
@@ -363,6 +348,11 @@ EOF
 if [[ $INBOX == 'mina' ]]; then
 cat >> ${PRIVATE}/lega.yml <<EOF
     environment:
+      - BROKER_USERNAME=${MQ_USER}
+      - BROKER_PASSWORD=${MQ_PASSWORD}
+      - BROKER_HOST=localega-mq-server${HOSTNAME_DOMAIN}
+      - BROKER_PORT=5671
+      - BROKER_VHOST=/
       - CEGA_ENDPOINT=${CEGA_USERS_ENDPOINT%/}/%s?idType=username
       - CEGA_ENDPOINT_CREDS=${CEGA_USERS_CREDS}
       - S3_ACCESS_KEY=${S3_ACCESS_KEY_INBOX}
@@ -423,6 +413,13 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     labels:
         lega_label: "ingest"
     environment:
+      - DB_CONNECTION=${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
+      - BROKER_CACERTFILE=/etc/ega/CA.cert
+      - BROKER_CERTFILE=/etc/ega/ssl.cert
+      - BROKER_KEYFILE=/etc/ega/ssl.key
+      - BROKER_VERIFY_HOSTNAME=no
+      - BROKER_VERIFY_PEER=yes
+      - BROKER_CONNECTION=${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
@@ -461,6 +458,13 @@ cat >> ${PRIVATE}/lega.yml <<EOF
         lega_label: "verify"
     image: neicnordic/sda-base:latest
     environment:
+      - DB_CONNECTION=${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
+      - BROKER_CACERTFILE=/etc/ega/CA.cert
+      - BROKER_CERTFILE=/etc/ega/ssl.cert
+      - BROKER_KEYFILE=/etc/ega/ssl.key
+      - BROKER_VERIFY_HOSTNAME=no
+      - BROKER_VERIFY_PEER=yes
+      - BROKER_CONNECTION=${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
@@ -498,6 +502,14 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     container_name: finalize${HOSTNAME_DOMAIN}
     labels:
         lega_label: "finalize"
+    environment:
+      - DB_CONNECTION=${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
+      - BROKER_CACERTFILE=/etc/ega/CA.cert
+      - BROKER_CERTFILE=/etc/ega/ssl.cert
+      - BROKER_KEYFILE=/etc/ega/ssl.key
+      - BROKER_VERIFY_HOSTNAME=no
+      - BROKER_VERIFY_PEER=yes
+      - BROKER_CONNECTION=${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
     volumes:
       - ./conf.ini:/etc/ega/conf.ini:ro
       - ./entrypoint.sh:/usr/local/bin/lega-entrypoint.sh
