@@ -13,7 +13,6 @@ TRACE_FILE=${PRIVATE}/config/trace.yml
 VERBOSE=no
 FORCE=yes
 OPENSSL=openssl
-INBOX=openssh
 INBOX_BACKEND=posix
 ARCHIVE_BACKEND=s3
 HOSTNAME_DOMAIN='.default' #".localega"
@@ -343,9 +342,6 @@ services:
     restart: on-failure:3
     networks:
       - lega
-EOF
-if [[ $INBOX == 'mina' ]]; then
-cat >> ${PRIVATE}/lega.yml <<EOF
     environment:
       - BROKER_USERNAME=${MQ_USER}
       - BROKER_PASSWORD=${MQ_PASSWORD}
@@ -354,50 +350,19 @@ cat >> ${PRIVATE}/lega.yml <<EOF
       - BROKER_VHOST=/
       - CEGA_ENDPOINT=${CEGA_USERS_ENDPOINT%/}/%s?idType=username
       - CEGA_ENDPOINT_CREDS=${CEGA_USERS_CREDS}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY_INBOX}
-      - S3_SECRET_KEY=${S3_SECRET_KEY_INBOX}
-      - S3_ENDPOINT=inbox-s3-backend:9000
       - KEYSTORE_TYPE=PKCS12
       - KEYSTORE_PASSWORD=changeit
       - KEYSTORE_PATH=/ega/tls/inbox.p12
       - USE_SSL=true
     ports:
       - "${DOCKER_PORT_inbox}:2222"
-    image: neicnordic/sda-inbox-sftp
+    image: neicnordic/sda-inbox-sftp:test
     volumes:
       - inbox:/ega/inbox
       - ./config/certs/htsget.p12:/ega/tls/inbox.p12
-      - ./config/certs/root.ca.crt:/etc/ega/CA.cert
+      - ./config/certs/cacerts:/opt/openjdk-13/lib/security/cacerts
 EOF
-else
-cat >> ${PRIVATE}/lega.yml <<EOF  # SFTP inbox
-    environment:
-      - CEGA_ENDPOINT=${CEGA_USERS_ENDPOINT}
-      - CEGA_ENDPOINT_CREDS=${CEGA_USERS_CREDS}
-      - CEGA_ENDPOINT_JSON_PREFIX=response.result
-      - MQ_CONNECTION=${MQ_CONNECTION}
-      - MQ_EXCHANGE=cega
-      - MQ_ROUTING_KEY=files.inbox
-      - MQ_VERIFY_PEER=yes
-      - MQ_VERIFY_HOSTNAME=no
-      - MQ_CA=/etc/ega/CA.cert
-      - MQ_CLIENT_CERT=/etc/ega/ssl.cert
-      - MQ_CLIENT_KEY=/etc/ega/ssl.key
-      - AUTH_VERIFY_PEER=yes
-      - AUTH_VERIFY_HOSTNAME=yes
-      - AUTH_CA=/etc/ega/CA.cert
-      - AUTH_CLIENT_CERT=/etc/ega/ssl.cert
-      - AUTH_CLIENT_KEY=/etc/ega/ssl.key
-    ports:
-      - "${DOCKER_PORT_inbox}:9000"
-    image: egarchive/lega-inbox:latest
-    volumes:
-      - inbox:/ega/inbox
-      - ./config/certs/inbox.ca.crt:/etc/ega/ssl.cert
-      - ./config/certs/inbox.ca.key:/etc/ega/ssl.key
-      - ./config/certs/root.ca.crt:/etc/ega/CA.cert
-EOF
-fi
+
 
 cat >> ${PRIVATE}/lega.yml <<EOF
 
