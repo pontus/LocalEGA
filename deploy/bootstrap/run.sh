@@ -313,7 +313,6 @@ services:
     environment:
       - DB_LEGA_IN_PASSWORD=${DB_LEGA_IN_PASSWORD}
       - DB_LEGA_OUT_PASSWORD=${DB_LEGA_OUT_PASSWORD}
-      - PGDATA=/ega/data
       - PG_SERVER_CERT=/tls/db.ca.crt
       - PG_SERVER_KEY=/tls/db.ca.key
       - PG_CA=/tls/root.ca.crt
@@ -324,7 +323,7 @@ services:
         lega_label: "localega-db"
     image: neicnordic/sda-db:latest
     volumes:
-      - db:/ega
+      - db:/var/lib/postgresql
       - ./config/certs/db.ca.crt:/tls/db.ca.crt
       - ./config/certs/db.ca.key:/tls/db.ca.key:ro
       - ./config/certs/root.ca.crt:/tls/root.ca.crt
