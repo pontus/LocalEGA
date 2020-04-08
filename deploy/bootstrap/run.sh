@@ -23,7 +23,6 @@ function usage {
     echo "Usage: $0 [options]"
     echo -e "\nOptions are:"
     echo -e "\t--openssl <value>     \tPath to the Openssl executable [Default: ${OPENSSL}]"
-    echo -e "\t--inbox <value>       \tSelect inbox \"openssh\" or \"mina\" [Default: ${INBOX}]"
     echo -e "\t--inbox-backend <value>   \tSelect the inbox backend: S3 or POSIX [Default: ${INBOX_BACKEND}]"
     echo -e "\t--archive-backend <value> \tSelect the archive backend: S3 or POSIX [Default: ${ARCHIVE_BACKEND}]"
     echo -e "\t--pythonexec <value>  \tPython execute command [Default: ${PYTHONEXEC}]"
@@ -44,7 +43,6 @@ while [[ $# -gt 0 ]]; do
         --verbose|-v) VERBOSE=yes;;
         --polite|-p) FORCE=no;;
         --openssl) OPENSSL=$2; shift;;
-        --inbox) INBOX=${2,,}; shift;;
         --inbox-backend) INBOX_BACKEND=${2,,}; shift;;
         --archive-backend) ARCHIVE_BACKEND=${2,,}; shift;;
         --pythonexec) PYTHONEXEC=$2; shift;;
@@ -403,7 +401,7 @@ EOF
 fi
 
 cat >> ${PRIVATE}/lega.yml <<EOF
-    restart: on-failure:3
+    restart: on-failure
     networks:
       - lega
     user: lega
@@ -448,7 +446,7 @@ EOF
 fi
 
 cat >> ${PRIVATE}/lega.yml <<EOF
-    restart: on-failure:3
+    restart: on-failure
     networks:
       - lega
     user: lega
@@ -480,7 +478,7 @@ cat >> ${PRIVATE}/lega.yml <<EOF
       - ./config/certs/finalize.ca.crt:/etc/ega/ssl.cert
       - ./config/certs/finalize.ca.key:/etc/ega/ssl.key
       - ./config/certs/root.ca.crt:/etc/ega/CA.cert
-    restart: on-failure:3
+    restart: on-failure
     networks:
       - lega
     user: lega
