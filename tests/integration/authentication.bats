@@ -21,7 +21,6 @@ function teardown() {
 }
 
 @test "Ingest a file for a user that does not exist in CentralEGA" {
-
     cat > ${TESTFILES}/wrong_user.sh <<EOF
 set timeout -1
 spawn ${LEGA_SFTP} -oBatchMode=yes nonexistant@localhost
@@ -40,23 +39,21 @@ EOF
 }
 
 @test "Ingest a file using the wrong user password" {
-
     TESTUSER=jane
     USER_PASS=nonsense_password
 
     cat > ${TESTFILES}/sftp_password.sh <<EOF
 set timeout -1
 spawn ${LEGA_SFTP} ${TESTUSER}@localhost
-expect "Please, enter your EGA password: "
+expect "${TESTUSER}@localhost's password: "
 send -- "${USER_PASS}\r"
-expect "Please, enter your EGA password: "
+expect "${TESTUSER}@localhost's password: "
 send -- "${USER_PASS}\r"
-expect "Please, enter your EGA password: "
+expect "${TESTUSER}@localhost's password: "
 send -- "${USER_PASS}\r"
 
 expect {
     "*Permission denied*" { exit 2 }
-    "*Connection closed*" { exit 2 }
     eof
 }
 EOF
@@ -67,7 +64,6 @@ EOF
 }
 
 @test "Ingest a file using the wrong user sshkey" {
-
     TESTUSER=jane
     ssh-keygen -f $TESTFILES/fake.sshkey -N ''
     chmod 400 $TESTFILES/fake.sshkey

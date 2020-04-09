@@ -10,32 +10,31 @@ Test server to act as CentralEGA endpoint for users
 
 import sys
 import os
+import logging
+import asyncio
 import json
 from base64 import b64decode
 import ssl
 
 from aiohttp import web
 
+#logging.basicConfig(format='[%(asctime)s][%(levelname)-8s] (L:%(lineno)s) %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(format='[%(levelname)-8s] (L:%(lineno)s) %(message)s')
+LOG = logging.getLogger(__name__)
+LOG.setLevel(logging.INFO)
+
 filepath = None
 instances = {}
 store = []
 usernames = {}
 uids = {}
-
-# WSGI app
-server = web.Application()
-
-# SSL settings
-ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH, cafile='/cega/CA.crt')
-ssl_ctx.verify_mode = ssl.CERT_REQUIRED
-ssl_ctx.check_hostname = False
-ssl_ctx.load_cert_chain('/cega/ssl.crt', keyfile='/cega/ssl.key')
+users_dir = ''
 
 def fetch_user_info(identifier, query):
     id_type = query.get('idType', None)
     if not id_type:
         raise web.HTTPBadRequest(text='Missing or wrong idType')
-    print(f'Requesting User {identifier} [type {id_type}]', file=sys.stderr)
+    LOG.info(f'Requesting User {identifier} [type {id_type}]')
     if id_type == 'username':
         pos = usernames.get(identifier, None)
         return store[pos] if pos is not None else None
@@ -58,6 +57,9 @@ async def user(request):
     if info is None or info != passwd:
         raise web.HTTPUnauthorized(text=f'Protected access\n')
 
+    # Reload users list
+    load_users()
+
     # Find user
     user_info = fetch_user_info(request.match_info['identifier'], request.rel_url.query)
     if user_info is None:
@@ -75,18 +77,43 @@ async def user(request):
                                              "result": [ user_info ]}
     })
 
-if __name__ == '__main__':
+def main():
+
     if len(sys.argv) < 3:
         print('Usage: {sys.argv[0] <hostaddr> <port> <filepath>}', file=sys.stderr)
         sys.exit(2)
 
     host = sys.argv[1]
     port = sys.argv[2]
+
+    global users_dir
     users_dir = sys.argv[3]
 
-    # Init DB
-    instances['legatest'] = 'legatest'  # Hard-coding legatest:legatest
+    server = web.Application()
+    load_users()
 
+    # Registering the routes
+    server.router.add_get('/lega/v1/legas/users/{identifier}', user, name='user')
+
+    # SSL settings
+    cacertfile = '/cega/CA.crt'
+    certfile = '/cega/ssl.crt'
+    keyfile = '/cega/ssl.key'
+
+    ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH, cafile=cacertfile)
+    ssl_ctx.check_hostname = False
+    ssl_ctx.verify_mode = ssl.CERT_NONE
+
+    ssl_ctx.load_cert_chain(certfile, keyfile=keyfile)
+
+    # aaaand... cue music
+    web.run_app(server, host=host, port=port, shutdown_timeout=0, ssl_context=ssl_ctx)
+
+
+def load_users():
+    # Initialization
+    global users_dir, instances, store, usernames, uids
+    instances['legatest'] = 'legatest' #'legatest'  # Hard-coding legatest:legatest
     json_files = [os.path.join(users_dir, f)
                   for f in os.listdir(users_dir)
                   if os.path.isfile(os.path.join(users_dir, f)) and f.endswith('.json')]
@@ -98,7 +125,6 @@ if __name__ == '__main__':
         usernames[d['username']] = i  # No KeyError, should be there
         uids[d['uid']] = i
 
-    # Registering the routes
-    server.router.add_get('/lega/v1/legas/users/{identifier}', user, name='user')
-    # aaaand... cue music
-    web.run_app(server, host=host, port=port, shutdown_timeout=0, ssl_context=ssl_ctx)
+
+if __name__ == '__main__':
+    main()
