@@ -13,7 +13,6 @@ TRACE_FILE=${PRIVATE}/config/trace.yml
 VERBOSE=no
 FORCE=yes
 OPENSSL=openssl
-INBOX_BACKEND=posix
 ARCHIVE_BACKEND=s3
 HOSTNAME_DOMAIN='.default' #".localega"
 
@@ -23,7 +22,6 @@ function usage {
     echo "Usage: $0 [options]"
     echo -e "\nOptions are:"
     echo -e "\t--openssl <value>     \tPath to the Openssl executable [Default: ${OPENSSL}]"
-    echo -e "\t--inbox-backend <value>   \tSelect the inbox backend: S3 or POSIX [Default: ${INBOX_BACKEND}]"
     echo -e "\t--archive-backend <value> \tSelect the archive backend: S3 or POSIX [Default: ${ARCHIVE_BACKEND}]"
     echo -e "\t--pythonexec <value>  \tPython execute command [Default: ${PYTHONEXEC}]"
     echo -e "\t--domain <value>      \tDomain for the hostnames [Default: '${HOSTNAME_DOMAIN}']"
@@ -43,7 +41,6 @@ while [[ $# -gt 0 ]]; do
         --verbose|-v) VERBOSE=yes;;
         --polite|-p) FORCE=no;;
         --openssl) OPENSSL=$2; shift;;
-        --inbox-backend) INBOX_BACKEND=${2,,}; shift;;
         --archive-backend) ARCHIVE_BACKEND=${2,,}; shift;;
         --pythonexec) PYTHONEXEC=$2; shift;;
         --domain) HOSTNAME_DOMAIN=${2,,}; shift;;
@@ -224,27 +221,14 @@ user = lega
 EOF
 fi
 
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-    cat >> ${PRIVATE}/conf.ini <<EOF
-
-[inbox]
-storage_driver = S3Storage
-url = https://inbox-s3-backend${HOSTNAME_DOMAIN}:9000
-access_key = ${S3_ACCESS_KEY_INBOX}
-secret_key = ${S3_SECRET_KEY_INBOX}
-s3_bucket = lega
-#region = lega
-EOF
-else
-    # Default: POSIX file system
-    cat >> ${PRIVATE}/conf.ini <<EOF
-
+cat >> ${PRIVATE}/conf.ini <<EOF
+# Default: POSIX file system
 [inbox]
 location = /ega/inbox/%s/
 chroot_sessions = True
 user = lega
 EOF
-fi
+
 
 #########################################################################
 # Specifying the LocalEGA components in the docke-compose file
@@ -265,12 +249,6 @@ volumes:
   inbox:
   archive:
 EOF
-
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-cat >> ${PRIVATE}/lega.yml <<EOF
-  inbox-s3:
-EOF
-fi
 
 cat >> ${PRIVATE}/lega.yml <<EOF
 
@@ -515,33 +493,6 @@ cat >> ${PRIVATE}/lega.yml <<EOF
 EOF
 fi
 
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-cat >> ${PRIVATE}/lega.yml <<EOF
-
-  # Inbox S3 Backend Storage
-  inbox-s3-backend:
-    hostname: inbox-s3-backend${HOSTNAME_DOMAIN}
-    container_name: inbox-s3-backend${HOSTNAME_DOMAIN}
-    labels:
-        lega_label: "inbox-s3-backend"
-    image: minio/minio:RELEASE.2018-12-19T23-46-24Z
-    environment:
-      - MINIO_ACCESS_KEY=${S3_ACCESS_KEY_INBOX}
-      - MINIO_SECRET_KEY=${S3_SECRET_KEY_INBOX}
-      - ./config/certs/s3.ca.crt:/root/.minio/certs/public.crt
-      - ./config/certs/s3.ca.key:/root/.minio/certs/private.key
-      - ./config/certs/root.ca.crt:/root/.minio/CAs/LocalEGA.crt
-    volumes:
-      - inbox-s3:/data
-    restart: on-failure:3
-    networks:
-      - lega
-    ports:
-      - "${DOCKER_PORT_s3_inbox}:9000"
-    command: ["server", "/data"]
-EOF
-fi
-
 if [[ ${REAL_CEGA} != 'yes' ]]; then
 
     #########################################################################
@@ -637,16 +588,6 @@ MQ_CONNECTION             = ${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
 MQ_EXCHANGE               = cega
 MQ_ROUTING_KEY            = files.inbox
 EOF
-
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-cat >> ${PRIVATE}/.trace <<EOF
-#
-# Inbox S3 backend
-DOCKER_PORT_s3_inbox      = ${DOCKER_PORT_s3_inbox}
-S3_ACCESS_KEY_INBOX       = ${S3_ACCESS_KEY_INBOX}
-S3_SECRET_KEY_INBOX       = ${S3_SECRET_KEY_INBOX}
-EOF
-fi
 
 task_complete "Bootstrap complete"
 echo "Run: sudo chown 70 ${PRIVATE}/config/certs/db.ca.key"
