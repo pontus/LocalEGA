@@ -354,7 +354,7 @@ services:
       - USE_SSL=true
     ports:
       - "${DOCKER_PORT_inbox}:2222"
-    image: neicnordic/sda-inbox-sftp:test
+    image: neicnordic/sda-inbox-sftp
     volumes:
       - inbox:/ega/inbox
       - ./config/certs/htsget.p12:/ega/tls/inbox.p12
