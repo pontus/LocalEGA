@@ -13,10 +13,6 @@ if args.service == 'cega':
 
     data = {'server_name_indication': f'cega-mq{args.domain}'}
 
-# elif args.service == 'mq':
-
-#     data = {}
-
 elif args.service == 'db':
 
     data = {'application_name': 'LocalEGA',
