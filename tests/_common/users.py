@@ -11,7 +11,6 @@ Test server to act as CentralEGA endpoint for users
 import sys
 import os
 import logging
-import asyncio
 import json
 from base64 import b64decode
 import ssl
