@@ -74,7 +74,7 @@ while True:
         user = data.get('user')
         filepath = data.get('filepath')
         assert( user and filepath )
-        if (user == args.user and filepath == args.filepath):
+        if (user == args.user and args.filepath in filepath):
             correlation_ids.append( (props.correlation_id,message_id) )
     except:
         pass

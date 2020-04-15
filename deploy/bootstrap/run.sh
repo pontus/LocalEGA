@@ -13,8 +13,6 @@ TRACE_FILE=${PRIVATE}/config/trace.yml
 VERBOSE=no
 FORCE=yes
 OPENSSL=openssl
-INBOX=openssh
-INBOX_BACKEND=posix
 ARCHIVE_BACKEND=s3
 HOSTNAME_DOMAIN='.default' #".localega"
 
@@ -24,8 +22,6 @@ function usage {
     echo "Usage: $0 [options]"
     echo -e "\nOptions are:"
     echo -e "\t--openssl <value>     \tPath to the Openssl executable [Default: ${OPENSSL}]"
-    echo -e "\t--inbox <value>       \tSelect inbox \"openssh\" or \"mina\" [Default: ${INBOX}]"
-    echo -e "\t--inbox-backend <value>   \tSelect the inbox backend: S3 or POSIX [Default: ${INBOX_BACKEND}]"
     echo -e "\t--archive-backend <value> \tSelect the archive backend: S3 or POSIX [Default: ${ARCHIVE_BACKEND}]"
     echo -e "\t--pythonexec <value>  \tPython execute command [Default: ${PYTHONEXEC}]"
     echo -e "\t--domain <value>      \tDomain for the hostnames [Default: '${HOSTNAME_DOMAIN}']"
@@ -45,8 +41,6 @@ while [[ $# -gt 0 ]]; do
         --verbose|-v) VERBOSE=yes;;
         --polite|-p) FORCE=no;;
         --openssl) OPENSSL=$2; shift;;
-        --inbox) INBOX=${2,,}; shift;;
-        --inbox-backend) INBOX_BACKEND=${2,,}; shift;;
         --archive-backend) ARCHIVE_BACKEND=${2,,}; shift;;
         --pythonexec) PYTHONEXEC=$2; shift;;
         --domain) HOSTNAME_DOMAIN=${2,,}; shift;;
@@ -203,21 +197,6 @@ DB_CONNECTION="postgres://lega_in:${DB_LEGA_IN_PASSWORD}@localega-db${HOSTNAME_D
 cat >> ${PRIVATE}/conf.ini <<EOF
 
 ## Connecting to Local EGA
-[broker]
-connection = ${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
-
-enable_ssl = yes
-verify_peer = yes
-verify_hostname = no
-
-cacertfile = /etc/ega/CA.cert
-certfile = /etc/ega/ssl.cert
-keyfile = /etc/ega/ssl.key
-
-[db]
-connection = ${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
-try = 30
-try_interval = 1
 
 [archive]
 EOF
@@ -242,27 +221,14 @@ user = lega
 EOF
 fi
 
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-    cat >> ${PRIVATE}/conf.ini <<EOF
-
-[inbox]
-storage_driver = S3Storage
-url = https://inbox-s3-backend${HOSTNAME_DOMAIN}:9000
-access_key = ${S3_ACCESS_KEY_INBOX}
-secret_key = ${S3_SECRET_KEY_INBOX}
-s3_bucket = lega
-#region = lega
-EOF
-else
-    # Default: POSIX file system
-    cat >> ${PRIVATE}/conf.ini <<EOF
-
+cat >> ${PRIVATE}/conf.ini <<EOF
+# Default: POSIX file system
 [inbox]
 location = /ega/inbox/%s/
 chroot_sessions = True
 user = lega
 EOF
-fi
+
 
 #########################################################################
 # Specifying the LocalEGA components in the docke-compose file
@@ -283,12 +249,6 @@ volumes:
   inbox:
   archive:
 EOF
-
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-cat >> ${PRIVATE}/lega.yml <<EOF
-  inbox-s3:
-EOF
-fi
 
 cat >> ${PRIVATE}/lega.yml <<EOF
 
@@ -328,7 +288,6 @@ services:
     environment:
       - DB_LEGA_IN_PASSWORD=${DB_LEGA_IN_PASSWORD}
       - DB_LEGA_OUT_PASSWORD=${DB_LEGA_OUT_PASSWORD}
-      - PGDATA=/ega/data
       - PG_SERVER_CERT=/tls/db.ca.crt
       - PG_SERVER_KEY=/tls/db.ca.key
       - PG_CA=/tls/root.ca.crt
@@ -339,7 +298,7 @@ services:
         lega_label: "localega-db"
     image: neicnordic/sda-db:latest
     volumes:
-      - db:/ega
+      - db:/var/lib/postgresql
       - ./config/certs/db.ca.crt:/tls/db.ca.crt
       - ./config/certs/db.ca.key:/tls/db.ca.key:ro
       - ./config/certs/root.ca.crt:/tls/root.ca.crt
@@ -359,15 +318,14 @@ services:
     restart: on-failure:3
     networks:
       - lega
-EOF
-if [[ $INBOX == 'mina' ]]; then
-cat >> ${PRIVATE}/lega.yml <<EOF
     environment:
+      - BROKER_USERNAME=${MQ_USER}
+      - BROKER_PASSWORD=${MQ_PASSWORD}
+      - BROKER_HOST=localega-mq-server${HOSTNAME_DOMAIN}
+      - BROKER_PORT=5671
+      - BROKER_VHOST=/
       - CEGA_ENDPOINT=${CEGA_USERS_ENDPOINT%/}/%s?idType=username
       - CEGA_ENDPOINT_CREDS=${CEGA_USERS_CREDS}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY_INBOX}
-      - S3_SECRET_KEY=${S3_SECRET_KEY_INBOX}
-      - S3_ENDPOINT=inbox-s3-backend:9000
       - KEYSTORE_TYPE=PKCS12
       - KEYSTORE_PASSWORD=changeit
       - KEYSTORE_PATH=/ega/tls/inbox.p12
@@ -378,37 +336,9 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     volumes:
       - inbox:/ega/inbox
       - ./config/certs/htsget.p12:/ega/tls/inbox.p12
-      - ./config/certs/root.ca.crt:/etc/ega/CA.cert
+      - ./config/certs/cacerts:/opt/openjdk-13/lib/security/cacerts
 EOF
-else
-cat >> ${PRIVATE}/lega.yml <<EOF  # SFTP inbox
-    environment:
-      - CEGA_ENDPOINT=${CEGA_USERS_ENDPOINT}
-      - CEGA_ENDPOINT_CREDS=${CEGA_USERS_CREDS}
-      - CEGA_ENDPOINT_JSON_PREFIX=response.result
-      - MQ_CONNECTION=${MQ_CONNECTION}
-      - MQ_EXCHANGE=cega
-      - MQ_ROUTING_KEY=files.inbox
-      - MQ_VERIFY_PEER=yes
-      - MQ_VERIFY_HOSTNAME=no
-      - MQ_CA=/etc/ega/CA.cert
-      - MQ_CLIENT_CERT=/etc/ega/ssl.cert
-      - MQ_CLIENT_KEY=/etc/ega/ssl.key
-      - AUTH_VERIFY_PEER=yes
-      - AUTH_VERIFY_HOSTNAME=yes
-      - AUTH_CA=/etc/ega/CA.cert
-      - AUTH_CLIENT_CERT=/etc/ega/ssl.cert
-      - AUTH_CLIENT_KEY=/etc/ega/ssl.key
-    ports:
-      - "${DOCKER_PORT_inbox}:9000"
-    image: egarchive/lega-inbox:latest
-    volumes:
-      - inbox:/ega/inbox
-      - ./config/certs/inbox.ca.crt:/etc/ega/ssl.cert
-      - ./config/certs/inbox.ca.key:/etc/ega/ssl.key
-      - ./config/certs/root.ca.crt:/etc/ega/CA.cert
-EOF
-fi
+
 
 cat >> ${PRIVATE}/lega.yml <<EOF
 
@@ -423,6 +353,13 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     labels:
         lega_label: "ingest"
     environment:
+      - DB_CONNECTION=${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
+      - BROKER_CACERTFILE=/etc/ega/CA.cert
+      - BROKER_CERTFILE=/etc/ega/ssl.cert
+      - BROKER_KEYFILE=/etc/ega/ssl.key
+      - BROKER_VERIFY_HOSTNAME=no
+      - BROKER_VERIFY_PEER=yes
+      - BROKER_CONNECTION=${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
@@ -442,7 +379,7 @@ EOF
 fi
 
 cat >> ${PRIVATE}/lega.yml <<EOF
-    restart: on-failure:3
+    restart: on-failure
     networks:
       - lega
     user: lega
@@ -461,6 +398,13 @@ cat >> ${PRIVATE}/lega.yml <<EOF
         lega_label: "verify"
     image: neicnordic/sda-base:latest
     environment:
+      - DB_CONNECTION=${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
+      - BROKER_CACERTFILE=/etc/ega/CA.cert
+      - BROKER_CERTFILE=/etc/ega/ssl.cert
+      - BROKER_KEYFILE=/etc/ega/ssl.key
+      - BROKER_VERIFY_HOSTNAME=no
+      - BROKER_VERIFY_PEER=yes
+      - BROKER_CONNECTION=${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
@@ -480,7 +424,7 @@ EOF
 fi
 
 cat >> ${PRIVATE}/lega.yml <<EOF
-    restart: on-failure:3
+    restart: on-failure
     networks:
       - lega
     user: lega
@@ -498,13 +442,21 @@ cat >> ${PRIVATE}/lega.yml <<EOF
     container_name: finalize${HOSTNAME_DOMAIN}
     labels:
         lega_label: "finalize"
+    environment:
+      - DB_CONNECTION=${DB_CONNECTION}?${DB_CONNECTION_PARAMS}
+      - BROKER_CACERTFILE=/etc/ega/CA.cert
+      - BROKER_CERTFILE=/etc/ega/ssl.cert
+      - BROKER_KEYFILE=/etc/ega/ssl.key
+      - BROKER_VERIFY_HOSTNAME=no
+      - BROKER_VERIFY_PEER=yes
+      - BROKER_CONNECTION=${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
     volumes:
       - ./conf.ini:/etc/ega/conf.ini:ro
       - ./entrypoint.sh:/usr/local/bin/lega-entrypoint.sh
       - ./config/certs/finalize.ca.crt:/etc/ega/ssl.cert
       - ./config/certs/finalize.ca.key:/etc/ega/ssl.key
       - ./config/certs/root.ca.crt:/etc/ega/CA.cert
-    restart: on-failure:3
+    restart: on-failure
     networks:
       - lega
     user: lega
@@ -537,33 +489,6 @@ cat >> ${PRIVATE}/lega.yml <<EOF
       - lega
     # ports:
     #   - "${DOCKER_PORT_s3}:9000"
-    command: ["server", "/data"]
-EOF
-fi
-
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-cat >> ${PRIVATE}/lega.yml <<EOF
-
-  # Inbox S3 Backend Storage
-  inbox-s3-backend:
-    hostname: inbox-s3-backend${HOSTNAME_DOMAIN}
-    container_name: inbox-s3-backend${HOSTNAME_DOMAIN}
-    labels:
-        lega_label: "inbox-s3-backend"
-    image: minio/minio:RELEASE.2018-12-19T23-46-24Z
-    environment:
-      - MINIO_ACCESS_KEY=${S3_ACCESS_KEY_INBOX}
-      - MINIO_SECRET_KEY=${S3_SECRET_KEY_INBOX}
-      - ./config/certs/s3.ca.crt:/root/.minio/certs/public.crt
-      - ./config/certs/s3.ca.key:/root/.minio/certs/private.key
-      - ./config/certs/root.ca.crt:/root/.minio/CAs/LocalEGA.crt
-    volumes:
-      - inbox-s3:/data
-    restart: on-failure:3
-    networks:
-      - lega
-    ports:
-      - "${DOCKER_PORT_s3_inbox}:9000"
     command: ["server", "/data"]
 EOF
 fi
@@ -663,16 +588,6 @@ MQ_CONNECTION             = ${MQ_CONNECTION}?${MQ_CONNECTION_PARAMS}
 MQ_EXCHANGE               = cega
 MQ_ROUTING_KEY            = files.inbox
 EOF
-
-if [[ ${INBOX_BACKEND} == 's3' ]]; then
-cat >> ${PRIVATE}/.trace <<EOF
-#
-# Inbox S3 backend
-DOCKER_PORT_s3_inbox      = ${DOCKER_PORT_s3_inbox}
-S3_ACCESS_KEY_INBOX       = ${S3_ACCESS_KEY_INBOX}
-S3_SECRET_KEY_INBOX       = ${S3_SECRET_KEY_INBOX}
-EOF
-fi
 
 task_complete "Bootstrap complete"
 echo "Run: sudo chown 70 ${PRIVATE}/config/certs/db.ca.key"

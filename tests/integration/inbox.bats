@@ -50,7 +50,7 @@ function teardown() {
 # 100 messages should be found in the inbox queue for those files.
 
 @test "Upload a batch of files" {
-
+    skip "Inbox bulk upload problematic"
     # Generate the names
     mkdir -p ${TESTFILES}/batch/dir{1..10}/subdir{1..10}
     declare TESTFILES_NAMES=()
@@ -80,7 +80,7 @@ function teardown() {
 # We should receive a message in the error queue
 
 @test "Ingestion of missing file goes to error" {
-
+    
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
     TESTFILE_UPLOADED="/${TESTFILE}.c4gh"

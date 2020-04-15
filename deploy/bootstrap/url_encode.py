@@ -11,20 +11,7 @@ args = parser.parse_args()
 
 if args.service == 'cega':
 
-    data = {'heartbeat': 0,
-            'connection_attempts': 30,
-            'retry_delay': 10,
-            'server_name_indication': f'cega-mq{args.domain}',
-            'verify': 'verify_peer',
-            'fail_if_no_peer_cert': 'true',
-            'cacertfile': '/etc/rabbitmq/CA.cert',
-            'certfile': '/etc/rabbitmq/ssl.cert',
-            'keyfile': '/etc/rabbitmq/ssl.key'}
-
-elif args.service == 'mq':
-
-    data = {'heartbeat': 0,
-            'connection_attempts': 30, 'retry_delay': 10}
+    data = {'server_name_indication': f'cega-mq{args.domain}'}
 
 elif args.service == 'db':
 
