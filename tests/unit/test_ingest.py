@@ -34,13 +34,17 @@ class testIngest(unittest.TestCase):
         mock_broker = mock.MagicMock(name='channel')
         mock_broker.channel.return_value = mock.Mock()
         infile = filedir.write('infile.in', bytearray.fromhex(c4gh_data.ENC_FILE))
-        data = {'filepath': infile, 'user': 'user_id@elixir-europe.org'}
+        data = {'filepath': infile, 'user': 'user_id@elixir-europe.org',
+                "encrypted_checksums": [{"type": "sha256", "value": "efa8ce457b27728b7af3351ed77793a6421190877128451830d68babbacf3021"}]}
         result = work(store, mock_broker, data)
         mocked = ({'filepath': infile, 'user': 'user_id@elixir-europe.org',
                    'file_id': 32,
-                   'org_msg': {'filepath': infile, 'user': 'user_id@elixir-europe.org'},
+                   'file_checksum': "efa8ce457b27728b7af3351ed77793a6421190877128451830d68babbacf3021",
+                   'org_msg': {'filepath': infile, 'user': 'user_id@elixir-europe.org',
+                               "encrypted_checksums": [{"type": "sha256", "value": "efa8ce457b27728b7af3351ed77793a6421190877128451830d68babbacf3021"}]},
                    'header': '686561646572',
                    'archive_path': 'smth'}, False)
+        print(result)
         self.assertEqual(mocked, result)
         filedir.cleanup()
 
