@@ -25,16 +25,18 @@ LOG = logging.getLogger(__name__)
 @errors.catch(ret_on_error=(None, True))
 def work(data):
     """Read a message containing the ids and add it to the database."""
-    file_id = data['file_id']
+    filepath = data['filepath']
+    user = data['user']
+    encrypted_checksum = data['file_checksum']
     stable_id = data['stable_id']
-    LOG.info("Mapping file_id %s to stable_id %s", file_id, stable_id)
+    LOG.info("Mapping file_id %s to stable_id %s", filepath, stable_id)
 
     # Remove file from the inbox
     # TODO
 
-    db.set_stable_id(file_id, stable_id)  # That will flag the entry as 'Ready'
+    db.set_stable_id(filepath, user, encrypted_checksum, stable_id)  # That will flag the entry as 'Ready'
 
-    LOG.info("Stable ID %s mapped to %s", stable_id, file_id)
+    LOG.info("Stable ID %s mapped to %s", stable_id, filepath)
     return (None, False)
 
 

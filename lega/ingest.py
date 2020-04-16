@@ -21,6 +21,7 @@ import sys
 import logging
 from functools import partial
 import io
+import hashlib
 
 from crypt4gh import header
 
@@ -57,9 +58,17 @@ def work(fs, inbox_fs, data):
     org_msg = data.copy()
     data['org_msg'] = org_msg
 
-    # Insert in database
+    # this uses a function to set the filepath and user_id
+    # in order to set the encrypted key we will do an update based on them
     file_id = db.insert_file(filepath, user_id)
+
     data['file_id'] = file_id  # must be there: database error uses it
+
+    # we will be working with sha256 only and let us see if we get in the message this for now
+    # if this is not present we will calculate it
+    file_checksum = []
+    if 'encrypted_checksums' in data:
+        file_checksum = [item for item in data['encrypted_checksums'] if item.get('type') == 'sha256']
 
     # Instantiate the inbox backend
     inbox = inbox_fs(user_id)
@@ -74,10 +83,22 @@ def work(fs, inbox_fs, data):
     # Record in database
     db.mark_in_progress(file_id)
 
+    sha = hashlib.sha256()
     # Strip the header out and copy the rest of the file to the archive
     LOG.debug('Opening %s', filepath)
     with inbox.open(filepath, 'rb') as infile:
         LOG.debug('Reading header | file_id: %s', file_id)
+
+        # if it is not provided in the message let us calculate the checksum
+        if not file_checksum:
+            file_buffer = infile.read(65536)
+            while len(file_buffer) > 0:
+                sha.update(file_buffer)
+                file_buffer = infile.read(65536)
+
+        # return to start of file
+        infile.seek(0)
+
         header_bytes = get_header(infile)
         header_hex = header_bytes.hex()
         data['header'] = header_hex
@@ -90,6 +111,23 @@ def work(fs, inbox_fs, data):
         LOG.info('Archive copying completed. Updating database')
         db.set_archived(file_id, target, target_size)
         data['archive_path'] = target
+
+    if not file_checksum:
+        encrypted_checksum = sha.hexdigest()
+        encrypted_checksum_type = 'sha256'
+        LOG.debug("calculated encrypted file checksum: %s", encrypted_checksum)
+    else:
+        encrypted_checksum = file_checksum[0]['value']
+        encrypted_checksum_type = file_checksum[0]['type']
+        LOG.debug("file checksum from message: %s", encrypted_checksum)
+
+    # No need to pass this arround as this is registered in the db
+    data.pop('encrypted_checksums', None)
+
+    # Keep it in the messages to indentify the file
+    data['file_checksum'] = encrypted_checksum
+    # Insert in database
+    db.set_file_encrypted_checksum(file_id, encrypted_checksum, encrypted_checksum_type)
 
     LOG.debug("Reply message: %s", data)
     return (data, False)
