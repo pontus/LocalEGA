@@ -58,8 +58,7 @@ def work(fs, inbox_fs, data):
     org_msg = data.copy()
     data['org_msg'] = org_msg
 
-    # this uses a function to set the filepath and user_id
-    # in order to set the encrypted key we will do an update based on them
+    # Insert in database
     file_id = db.insert_file(filepath, user_id)
 
     data['file_id'] = file_id  # must be there: database error uses it
@@ -85,6 +84,7 @@ def work(fs, inbox_fs, data):
 
     sha = hashlib.sha256()
     # Strip the header out and copy the rest of the file to the archive
+    # if the checksum was not provided calculate it
     LOG.debug('Opening %s', filepath)
     with inbox.open(filepath, 'rb') as infile:
         LOG.debug('Reading header | file_id: %s', file_id)
@@ -99,6 +99,7 @@ def work(fs, inbox_fs, data):
         # return to start of file
         infile.seek(0)
 
+        # now start splitting the header from the rest of the file
         header_bytes = get_header(infile)
         header_hex = header_bytes.hex()
         data['header'] = header_hex
@@ -126,7 +127,7 @@ def work(fs, inbox_fs, data):
 
     # Keep it in the messages to indentify the file
     data['file_checksum'] = encrypted_checksum
-    # Insert in database
+    # Insert checksum in database
     db.set_file_encrypted_checksum(file_id, encrypted_checksum, encrypted_checksum_type)
 
     LOG.debug("Reply message: %s", data)
