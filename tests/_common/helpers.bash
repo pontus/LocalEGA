@@ -23,6 +23,7 @@ TRACE_FILE=${DOCKER_PATH}/private/config/trace.yml
 # as LocalEGA components, and accessible from the localhost via a port mapping
 CEGA_PASSWORD=$(cat ${TRACE_FILE} | shyaml get-value secrets.cega_mq_pass)
 export CEGA_CONNECTION="amqps://lega:${CEGA_PASSWORD}@localhost:5670/lega"
+DBPASSWORD=$(cat ${TRACE_FILE} | shyaml get-value secrets.pg_in_password)
 
 # Create certfile/keyfile for testsuite
 cp -f ${MAIN_REPO}/deploy/private/config/certs/tester.ca.{key,crt} ${HERE}/mq/.
@@ -33,6 +34,7 @@ MQ_CONSUME="python ${HERE}/mq/consume.py --connection ${CEGA_CONNECTION}"
 MQ_FIND="python ${HERE}/mq/find.py --connection ${CEGA_CONNECTION}"
 MQ_GET="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION}"
 MQ_GET_INBOX="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.inbox"
+MQ_GET_COMPLETED="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.completed"
 MQ_PUBLISH="python ${HERE}/mq/publish.py --connection ${CEGA_CONNECTION}"
 
 # Convenience function to capture _all_ outputs
@@ -180,6 +182,62 @@ function lega_trigger_ingestion {
     # The message should contain the same info as the trigger message
     [[ "$output" =~ "user: dummy" ]]
     [[ "$output" =~ "filepath: ${upload_path}" ]]
+}
+
+function lega_trigger_stabled_id {
+    local user=$1
+    local upload_path=$2
+    local queue=$3
+    local attempts=$4
+    local delay=$5
+
+    [ -n "${user}" ]
+
+    # Fetch the correlation id for that file (Hint: with user/filepath combination)
+    retry_until 0 $attempts $delay ${MQ_GET_INBOX} "${user}" "${upload_path}"
+    [ "$status" -eq 0 ]
+    CORRELATION_ID=$output
+
+    # Publish the file to simulate a CentralEGA trigger
+    MESSAGE="{ \"user\": \"${user}\", \"filepath\": \"${upload_path}\",
+               \"encrypted_checksums\": [{\"type\": \"sha256\", \"value\": \"somechecksum\"}]}"
+    legarun ${MQ_PUBLISH} --correlation_id "${CORRELATION_ID}" files "$MESSAGE"
+    [ "$status" -eq 0 ]
+
+    # Fetch the correlation id for that file (Hint: with user/filepath combination)
+    retry_until 0 $attempts $delay ${MQ_GET_COMPLETED} "${user}" "${upload_path}"
+    [ "$status" -eq 0 ]
+    CORRELATION_ID=$output
+
+    # Publish the file to simulate a CentralEGA trigger
+    MESSAGE="{ \"user\": \"${user}\", \"filepath\": \"${upload_path}\",
+               \"file_checksum\": \"somechecksum\", \"stable_id\": \"EGAF001\"}"
+    legarun ${MQ_PUBLISH} --correlation_id "${CORRELATION_ID}" stableIDs "$MESSAGE"
+    [ "$status" -eq 0 ]
+
+    # Check that a message with the above correlation id arrived in the expected queue
+    # Waiting attemps * delay seconds.
+    output=$(PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select stable_id from local_ega.files where inbox_file_checksum = 'somechecksum' limit 1;")
+    [[ "$output" =~ "EGAF001" ]]
+}
+
+function lega_stable_id {
+    local TESTFILE=$1
+    local size=$2 # in MB
+    local queue=$3
+    local inputsource=${4:-/dev/urandom}
+
+    TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+
+    # Generate a random file
+    lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} $size $inputsource
+
+    # Upload it
+    lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}"
+    [ "$status" -eq 0 ]
+
+    lega_trigger_stabled_id "${TESTUSER}" "${TESTFILE_UPLOADED}" $queue 30 10
 }
 
 
