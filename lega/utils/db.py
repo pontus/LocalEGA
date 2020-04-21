@@ -195,12 +195,17 @@ def set_stable_id(filepath, user, encrypted_checksum, stable_id):
         cur.execute('UPDATE local_ega.files '
                     'SET status = %(status)s, '
                     '    stable_id = %(stable_id)s '
-                    'WHERE elixir_id = %(user)s AND inbox_path = %(filepath)s AND inbox_file_checksum = %(encrypted_checksum)s;',
+                    'WHERE elixir_id = %(user)s AND inbox_path = %(filepath)s '
+                    ' AND inbox_file_checksum = %(encrypted_checksum)s'
+                    ' AND status != %(disabled)s;',
                     {'status': 'READY',
                      'user': user,
                      'stable_id': stable_id,
                      'filepath': filepath,
-                     'encrypted_checksum': encrypted_checksum})
+                     'encrypted_checksum': encrypted_checksum,
+                     # The completed status is to avoid DISABLED file
+                     # ingested twice with same checksum and file id and path
+                     'disabled': 'DISABLED'})
 
 
 def store_header(file_id, header):

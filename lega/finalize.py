@@ -29,7 +29,7 @@ def work(data):
     user = data['user']
     encrypted_checksum = data['file_checksum']
     stable_id = data['stable_id']
-    LOG.info("Mapping file_id %s to stable_id %s", filepath, stable_id)
+    LOG.info("Mapping file with path %s and checksum %s to stable_id %s", filepath, encrypted_checksum, stable_id)
 
     # Remove file from the inbox
     # TODO
