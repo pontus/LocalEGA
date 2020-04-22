@@ -13,7 +13,7 @@ LocalEGA ingests into its archive, files that are dropped in some inbox.
 The program is divided into several components interconnected via a
 message broker and a database.
 
-Users are handled throught Central EGA, directly.
+Users are handled through Central EGA, directly.
 ''',
       packages=find_packages(),
       include_package_data=False,

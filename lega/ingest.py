@@ -122,7 +122,7 @@ def work(fs, inbox_fs, data):
         encrypted_checksum_type = file_checksum[0]['type']
         LOG.debug("file checksum from message: %s", encrypted_checksum)
 
-    # No need to pass this arround as this is registered in the db
+    # No need to pass this around as this is registered in the db
     data.pop('encrypted_checksums', None)
 
     # Keep it in the messages to indentify the file

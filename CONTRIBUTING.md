@@ -84,7 +84,7 @@ Other people may also look at and review the code.
 
 A reviewers job is to:
 
-  * Write polite and friendly comments - remember that it can be tough to have other people critizising your work, a little kindness goes a long way. This does not mean we should not comment on things that need to be changed of course.
+  * Write polite and friendly comments - remember that it can be tough to have other people criticizing your work, a little kindness goes a long way. This does not mean we should not comment on things that need to be changed of course.
   * Read the code and make sure it is understandable
   * Make sure that commit messages and commits are structured so that it is possible to understand why certain changes were made.
   * Ensure that the test-suite covers the new behavior
