@@ -1,34 +1,34 @@
-# NeIC Local EGA
+# NeIC Sensitive Data Archive
 
 This is a fork of https://github.com/EGA-archive/LocalEGA adapted for NeIC Tryggve2 use cases.
 
 ![](https://github.com/neicnordic/LocalEGA/workflows/Python%20unit%20tests/badge.svg)
 ![](https://github.com/neicnordic/LocalEGA/workflows/Python%20style%20check/badge.svg)
 ![](https://github.com/neicnordic/LocalEGA/workflows/Integration%20Tests/badge.svg)
-[![Documentation Status](https://readthedocs.org/projects/neic-localega/badge/?version=latest)](https://neic-localega.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/neic-sda/badge/?version=latest)](https://neic-sda.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/neicnordic/LocalEGA/badge.svg?branch=master)](https://coveralls.io/github/neicnordic/LocalEGA?branch=master)
 
 The [code](lega) is written in Python (3.6+).
 
-You can provision and deploy the different components, locally, using [docker-compose](deploy).
+One can provision and deploy the different components, locally, using [docker-compose](deploy).
 
-Other provisioning methods are provided by our partners:
+Other provisioning methods provided:
 
-* on a [Kubernetes](https://github.com/NBISweden/LocalEGA-helm), using `kubernetes`;
+* on a [Kubernetes](https://github.com/neicnordic/sda-helm/), using `kubernetes` and `helm` charts;
 * on a [Docker Swarm cluster](https://github.com/neicnordic/LocalEGA-deploy-swarm), using `gradle` and `docker swarm`.
 
 # Architecture
 
-LocalEGA is divided into several components, as docker containers.
+SDA is divided into several components, as docker containers.
 
-| Components  | Role |
+| Component   | Role |
 |-------------|------|
 | db          | A Postgres database with appropriate schemas and isolations |
 | mq          | A (local) RabbitMQ message broker with appropriate accounts, exchanges, queues and bindings, connected to the CentralEGA counter-part. |
-| inbox       | SFTP server, acting as a dropbox, where user credentials are fetched from CentralEGA |
-| ingesters   | Split the Crypt4GH header and move the remainder to the storage backend. No cryptographic task, nor access to the decryption keys. |
-| verifiers   | Decrypt the stored files and checksum them against their embedded checksum. |
+| inbox       | SFTP, S3 or HTTPS server, acting as a dropbox, where user credentials are fetched from CentralEGA or via ELIXIR AAI. |
+| ingest      | Split the Crypt4GH header and move the remainder to the storage backend. No cryptographic task, nor access to the decryption keys. |
+| verify      | Decrypt the stored files and checksum them against their embedded checksum. |
 | archive     | Storage backend: as a regular file system or as a S3 object store. |
-| finalizers  | Handle the so-called _Stable ID_ filename mappings from CentralEGA. |
+| finalize    | Handle the so-called _Stable ID_ filename mappings from CentralEGA. |
 
-Find the [NeIC LocalEGA documentation](https://neic-localega.readthedocs.io) hosted on [ReadTheDocs.org](https://readthedocs.org/).
+Find the [NeIC SDA documentation](https://neic-sda.readthedocs.io) hosted on [ReadTheDocs.org](https://readthedocs.org/).
