@@ -1,4 +1,4 @@
-# Deploy LocalEGA using Docker
+# Deploy SDA using Docker
 
 ## Bootstrap
 
@@ -6,7 +6,13 @@ You can then [generate the private data](bootstrap), with:
 
 	make bootstrap
 
-This requires `openssl` (>=1.1), `ssh-keygen` (=>6.5), `expect` and [`crypt4gh-keygen`](https://github.com/EGA-archive/crypt4gh).
+This requires:
+ - `openssl` (>=1.1)
+ - `ssh-keygen` (=>6.5)
+ - `expect`
+ - [`crypt4gh-keygen`](https://github.com/EGA-archive/crypt4gh).
+ - [shyaml](https://github.com/0k/shyaml)
+ - [LocalEGA-deploy-init](https://github.com/neicnordic/LocalEGA-deploy-init)
 
 The command will create a `.env` file and a `private` folder holding
 the necessary data (ie the master keypair, the SSL
@@ -68,7 +74,7 @@ Remove everything:
 
 ----
 
-# LocalEGA docker images
+# SDA docker images
 
 `docker-compose` has a subcommand to build the images.
 
@@ -88,11 +94,10 @@ The following images are pulled from Docker Hub:
 
 * `neicnordic/sda-mq` (based on `rabbitmq:3.7.8-management`)
 * `neicnordic/sda-db` (based on `postgres:11.2`)
-* `neicnordic/sda-inbox` (based on OpenSSH version 7.8p1 and CentOS7)
 * `neicnordic/sda-inbox-sftp` (based on Apache Mina)
 * `python:3.6-alpine3.8`
 
-The [`neicnordic/sda-inbox`](https://github.com/EGA-archive/LocalEGA-inbox) and [`nbisweden/lega-inbox`](https://github.com/NBISweden/LocalEGA-inbox) are LocalEGA inboxes, fetching user credentials from CentralEGA and sending file events notifications to the configured message broker. It is based on OpenSSH SFTP server version `7.8p1`
+The [`neicnordic/sda-inbox`](https://github.com/EGA-archive/LocalEGA-inbox) and [`neicnordic/lega-inbox`](https://github.com/neicnordic/LocalEGA-inbox) are LocalEGA inboxes, fetching user credentials from CentralEGA and sending file events notifications to the configured message broker. It is based on OpenSSH SFTP server version `7.8p1`
 
 ## Testing
 
