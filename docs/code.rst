@@ -10,18 +10,9 @@ Python Modules
 
     lega.conf
     lega.utils
-    lega.notifications
     lega.ingest
     lega.verify
-    lega.keyserver
     lega.finalize
-
-*******************
-Inbox notifications
-*******************
-
-.. automodule:: lega.notifications
-
 
 ****************
 Ingestion Worker
@@ -33,13 +24,6 @@ Ingestion Worker
    :members:
 .. automodule:: lega.finalize
    :members:
-
-
-*********
-Keyserver
-*********
-
-.. automodule:: lega.keyserver
 
 *****************
 Utility Functions
@@ -54,7 +38,6 @@ Utility Functions
     lega.utils.checksum
     lega.utils.db
     lega.utils.storage
-    lega.utils.eureka
     lega.utils.exceptions
     lega.utils.logging
 
