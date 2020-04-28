@@ -142,6 +142,18 @@ def insert_file(filename, user_id):
         raise Exception('Database issue with insert_file')
 
 
+def set_file_encrypted_checksum(file_id, encrypted_checksum, encrypted_checksum_type):
+    """Insert encrypted checksum."""
+    with connection.cursor() as cur:
+        cur.execute('UPDATE local_ega.files '
+                    'SET inbox_file_checksum = %(encrypted_checksum)s, '
+                    '    inbox_file_checksum_type = %(encrypted_checksum_type)s'
+                    'WHERE id = %(file_id)s;',
+                    {'encrypted_checksum': encrypted_checksum,
+                     'encrypted_checksum_type': encrypted_checksum_type.upper(),
+                     'file_id': file_id})
+
+
 def set_error(file_id, error, from_user=False):
     """Store error related to ``file_id`` in database."""
     assert file_id, 'Eh? No file_id?'
@@ -176,18 +188,24 @@ def mark_in_progress(file_id):
                      'file_id': file_id})
 
 
-def set_stable_id(file_id, stable_id):
-    """Update File ``file_id`` stable ID."""
-    assert file_id, 'Eh? No file_id?'
-    LOG.debug('Updating file_id %s with stable ID "%s"', file_id, stable_id)
+def set_stable_id(filepath, user, encrypted_checksum, stable_id):
+    """Update File with stable ID."""
+    LOG.debug('Updating filepath %s for user %s with stable ID "%s"', filepath, user, stable_id)
     with connection.cursor() as cur:
         cur.execute('UPDATE local_ega.files '
                     'SET status = %(status)s, '
                     '    stable_id = %(stable_id)s '
-                    'WHERE id = %(file_id)s;',
+                    'WHERE elixir_id = %(user)s AND inbox_path = %(filepath)s '
+                    ' AND inbox_file_checksum = %(encrypted_checksum)s'
+                    ' AND status != %(disabled)s;',
                     {'status': 'READY',
-                     'file_id': file_id,
-                     'stable_id': stable_id})
+                     'user': user,
+                     'stable_id': stable_id,
+                     'filepath': filepath,
+                     'encrypted_checksum': encrypted_checksum,
+                     # The completed status is to avoid DISABLED file
+                     # ingested twice with same checksum and file id and path
+                     'disabled': 'DISABLED'})
 
 
 def store_header(file_id, header):

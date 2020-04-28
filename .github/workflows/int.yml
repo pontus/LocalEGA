@@ -37,7 +37,7 @@ jobs:
         pip install git+https://github.com/EGA-archive/crypt4gh.git@v1.1
         pip install pika==1.0.1
         pip install shyaml
-        sudo apt-get install expect
+        sudo apt-get install expect postgresql-client
     - name: Build image
       run:  |
         docker build -f Dockerfile \

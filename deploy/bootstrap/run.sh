@@ -297,6 +297,8 @@ services:
     labels:
         lega_label: "localega-db"
     image: neicnordic/sda-db:latest
+    ports:
+      - "5432:5432"
     volumes:
       - db:/var/lib/postgresql
       - ./config/certs/db.ca.crt:/tls/db.ca.crt

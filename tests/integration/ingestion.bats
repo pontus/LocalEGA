@@ -92,6 +92,11 @@ function teardown() {
     [[ "$output" =~ "reason: Session key (likely) already used." ]]
 }
 
+@test "Get an accession id" {
+    
+    lega_stable_id $(uuidgen) 10 v1.stableIDs
+}
+
 # Ingesting a file not in Crypt4GH format
 # ---------------------------------------
 #
