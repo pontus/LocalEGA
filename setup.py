@@ -3,10 +3,10 @@ from lega import __version__
 
 setup(name='lega',
       version=__version__,
-      url='https://localega.readthedocs.io/',
+      url='https://neic-sda.readthedocs.io/',
       license='Apache License 2.0',
-      author='EGA System Developers',
-      description='Local EGA',
+      author='NeIC System Developers',
+      description='SDA',
       long_description='''\
 LocalEGA ingests into its archive, files that are dropped in some inbox.
 
@@ -43,5 +43,8 @@ Users are handled through Central EGA, directly.
                    'pytest-cov',
                    'aioresponses',
                    'testfixtures',
-                   'coveralls', 'coverage==4.5.4']}
+                   'coveralls', 'coverage==4.5.4'],
+          'docs': [
+              'sphinx >= 1.4',
+              'sphinx_rtd_theme', 'recommonmark']}
       )
