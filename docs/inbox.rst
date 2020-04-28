@@ -1,29 +1,26 @@
-.. _`inbox login system`:
+.. _`inboxlogin`:
 
-Inbox login system
+Inbox Login System
 ==================
 
 Central EGA contains a database of users, with IDs and passwords.
 
-We have developed two solutions both of them allowing user authentication via either a password or
-an RSA key against CentralEGA database itself:
+We have developed several solutions allowing user authentication 
+against CentralEGA user database:
 
-* :ref:`apache-mina-inbox`.
+* :ref:`apache-mina-inbox`;
+* :ref:`s3-inbox`;
+* :ref:`tsd-file-api`.
 
 Each solution uses CentralEGA's user IDs but can also be extended to
 use Elixir IDs (of which we strip the ``@elixir-europe.org`` suffix).
 
 The procedure is as follows: the inbox is started without any created
-user. When a user wants to log into the inbox (actually, only ``sftp``
-uploads are allowed), the code looks up the username in a local
-cache, and, if not found, queries the CentralEGA REST endpoint. Upon
-return, we store the user credentials in the local cache and create
+user. When a user wants to log into the inbox (via ``sftp``, s3 or ``https``),
+the inbox service looks up the username in a local queries the CentralEGA REST endpoint. 
+Upon return, we store the user credentials in the local cache and create
 the user's home directory. The user now gets logged in if the password
-or public key authentication succeeds. Upon subsequent login attempts,
-only the local cache is queried, until the user's credentials
-expire. The cache has a default TTL of one hour, and is wiped clean
-upon reboot (as a cache should).
-
+or public key authentication succeeds.
 
 .. _apache-mina-inbox:
 
@@ -31,8 +28,7 @@ Apache Mina Inbox
 -----------------
 
 This solution makes use of `Apache Mina SSHD project <https://mina.apache.org/sshd-project/>`_,
-the user is locked within their home folder, which is done by using `RootedFileSystem
-<https://github.com/apache/mina-sshd/blob/master/sshd-core/src/main/java/org/apache/sshd/common/file/root/RootedFileSystem.java>`_.
+the user is locked within their home folder, which is done by using ``RootedFileSystem``.
 
 The user's home directory is created upon successful login.
 Moreover, for each user, we detect when the file upload is completed and compute its
@@ -45,33 +41,84 @@ Configuration
 
 Environment variables used:
 
-+------------------+---------------+
-| Variable name    | Default value |
-+==================+===============+
-| BROKER_USERNAME  | guest         |
-+------------------+---------------+
-| BROKER_PASSWORD  | guest         |
-+------------------+---------------+
-| BROKER_HOST      | mq            |
-+------------------+---------------+
-| BROKER_PORT      | 5672          |
-+------------------+---------------+
-| INBOX_PORT       | 2222          |
-+------------------+---------------+
-| INBOX_LOCATION   | /ega/inbox/   |
-+------------------+---------------+
-| CACHE_TTL        | 3600.0        |
-+------------------+---------------+
-| CEGA_ENDPOINT    |               |
-+------------------+---------------+
-| CACHE_TTL        |               |
-+------------------+---------------+
++---------------------+--------------------+-------------------------+
+| Variable name       | Default value      | Description             |
++=====================+====================+=========================+
+| BROKER_USERNAME     | guest              | RabbitMQ broker         |
+|                     |                    | username                |
++---------------------+--------------------+-------------------------+
+| BROKER_PASSWORD     | guest              | RabbitMQ broker         |
+|                     |                    | password                |
++---------------------+--------------------+-------------------------+
+| BROKER_HOST         | mq                 | RabbitMQ broker host    |
++---------------------+--------------------+-------------------------+
+| BROKER_PORT         | 5672               | RabbitMQ broker port    |
++---------------------+--------------------+-------------------------+
+| BROKER_VHOST        | /                  | RabbitMQ broker vhost   |
++---------------------+--------------------+-------------------------+
+| INBOX_PORT          | 2222               | Inbox port              |
++---------------------+--------------------+-------------------------+
+| INBOX_LOCATION      | /ega/inbox/        | Path to POSIX Inbox     |
+|                     |                    | backend                 |
++---------------------+--------------------+-------------------------+
+| INBOX_KEYPAIR       |                    | Path to RSA keypair     |
+|                     |                    | file                    |
++---------------------+--------------------+-------------------------+
+| KEYSTORE_TYPE       | JKS                | Keystore type to use,   |
+|                     |                    | JKS or PKCS12           |
++---------------------+--------------------+-------------------------+
+| KEYSTORE_PATH       | /etc/ega/inbox.jks | Path to Keystore file   |
++---------------------+--------------------+-------------------------+
+| KEYSTORE_PASSWORD   |                    | Password to access the  |
+|                     |                    | Keystore                |
++---------------------+--------------------+-------------------------+
+| CACHE_TTL           | 3600.0             | CEGA credentials        |
+|                     |                    | time-to-live            |
++---------------------+--------------------+-------------------------+
+| CEGA_ENDPOINT       |                    | CEGA REST endpoint      |
++---------------------+--------------------+-------------------------+
+| CEGA_ENDPOINT_CREDS |                    | CEGA REST credentials   |
++---------------------+--------------------+-------------------------+
+| S3_ENDPOINT         | inbox-backend:9000 | Inbox S3 backend URL    |
++---------------------+--------------------+-------------------------+
+| S3_REGION           | us-east-1          | Inbox S3 backend region |
+|                     |                    | (us-east-1 is default   |
+|                     |                    | in Minio)               |
++---------------------+--------------------+-------------------------+
+| S3_ACCESS_KEY       |                    | Inbox S3 backend access |
+|                     |                    | key (S3 disabled if not |
+|                     |                    | specified)              |
++---------------------+--------------------+-------------------------+
+| S3_SECRET_KEY       |                    | Inbox S3 backend secret |
+|                     |                    | key (S3 disabled if not |
+|                     |                    | specified)              |
++---------------------+--------------------+-------------------------+
+| USE_SSL             | true               | true if S3 Inbox        |
+|                     |                    | backend should be       |
+|                     |                    | accessed by HTTPS       |
++---------------------+--------------------+-------------------------+
+| LOGSTASH_HOST       |                    | Hostname of the         |
+|                     |                    | Logstash instance (if   |
+|                     |                    | any)                    |
++---------------------+--------------------+-------------------------+
+| LOGSTASH_PORT       |                    | Port of the Logstash    |
+|                     |                    | instance (if any)       |
++---------------------+--------------------+-------------------------+
 
-Implementation
-^^^^^^^^^^^^^^
 
-As mentioned above, the implementation is based on Java library Apache Mina SSHD. It provides a scalable and high
-performance asynchronous IO API to support the SSH (and SFTP) protocols.
+As mentioned above, the implementation is based on Java library Apache Mina SSHD.
 
-Sources are located at the separate repo: https://github.com/NBISweden/LocalEGA-inbox
-Essentially, it's a Spring-based Maven project, integrated to a common LocalEGA MQ bus.
+Sources are located at the separate repo: https://github.com/neicnordic/LocalEGA-inbox
+Essentially, it's a Spring-based Maven project, integrated with the :ref:`mq`.
+
+
+.. _s3-inbox:
+
+S3 Proxy Inbox
+--------------
+
+
+.. _tsd-file-api:
+
+TSD File API
+------------
