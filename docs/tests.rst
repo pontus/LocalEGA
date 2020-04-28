@@ -1,80 +1,86 @@
-.. _`testsuite`:
+Testing
+=======
 
-Testsuite
-=========
+We have implemented 2 types of testsuite: 
 
-We have implemented 2 types of testsuite: one set of *unit tests* to
-test the functionalities of the code and one set of *integration
-tests* to test the overall architecture. The latter does actually
-deploy a chosen setup and runs several scenarios, simulating how users
-will utilize the system as a whole.
+- one set of *unit tests* to test the functionalities of the code; 
+- one set of *integration tests* to test the overall architecture.
+
+The latter does actually deploy a chosen setup and runs several scenarios, users
+will utilize the system as a whole, .
+
+.. note:: Unit tests and integration tests are automatically executed 
+          with every push and PR to the ``NBIS Github repo``.
+
 
 Unit Tests
-^^^^^^^^^^
+----------
 
 Unit tests are minimal: Given a set of input values for a chosen
 function, they execute the function and check if the output has the
 expected values. Moreover, they capture triggered exceptions and
-errors. Additionally we also perform pep8 and pep257 style guide checks
-using `flake8  <http://flake8.pycqa.org/en/latest/>`_ with the following
-configuration:
+errors. Additionally we also perform PEP8 and PEP257 coding style guide checks
+using `flake8  <http://flake8.pycqa.org/en/latest/>`_.
+Sphinx documentation check for links consistency and HTML output
+and `tox <http://tox.readthedocs.io/>`_ to automate running tests. 
 
-.. code-block:: yaml
-
-    [flake8]
-    ignore = E226,E302
-    exclude =
-        docker,
-        extras,
-        .tox
-    max-line-length = 160
-    max-complexity = 10
-
-Unit tests can be run using the ``tox`` commands.
+Unit tests can in parellel be run using the ``tox`` commands.
 
 .. code-block:: console
 
     $ cd [git-repo]
-    $ tox
+    $ tox -p auto
 
 Integration Tests
-^^^^^^^^^^^^^^^^^
+-----------------
 
-Integration tests are more involved and simulate how a user will use
-the system. Therefore, we have develop a `bootstrap script
-<bootstrap>`_ to kickstart the system, and we execute a set of scenarii
-in it. `The implementation
-<https://github.com/NBISweden/LocalEGA/blob/dev/docker/tests/README.md>`_
-is in Java, and we target a docker-based environment.
+Unit Tests are run with pytest, coverage and tox.
+The other tests use `BATS <https://github.com/bats-core/bats-core>`_.
 
-We have grouped the integration around 2 targets: *Common tests* and *Robustness tests*.
+Integration Scenarios
+^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: console
+These tests treat the system as a black box, only checking the expected output for a given input.
 
-    $ cd [git-repo]/docker/tests
-    $ mvn test -Dtest=CommonTests -B
-    $ mvn test -Dtest=RobustnessTests -B
+- [x] Ingesting a 10MB file - Expected outcome: Message in the CentralEGA completed queue
+- [x] Ingesting a 1 GB file - Expected outcome: Message in the CentralEGA completed queue
+- [x] Ingesting a directory with multiple files and/or subdirectories - Expected outcome: Messages in the CentralEGA completed queue
+- [x] Upload 2 files encrypted with same session key - Expected outcome: Message in the CentralEGA user-error queue for the second file
+- [x] (skipped) Use 2 stable IDs for the same ingested file - Expected outcome: Error captured
+- [x] Ingest a file with a user that does not exist in CentralEGA - Expected outcome: Authentication "fails", and the ingestion does not start
+- [x] Ingest a file with a user in CentralEGA, using the wrong password - Expected outcome: Authentication "fails", and the ingestion does not start
+- [x] Ingest a file with a user in CentralEGA, using the wrong sshkey - Expected outcome: Fallback to password (previous scenario)
+- [x] Ingest a file for a given LocalEGA using the key of another one - Expected outcome: Message in the CentralEGA error queue, with the relevant content.
+- [x] Ingestion with wrong file format - Expected outcome: Message in the CentralEGA error queue, with the relevant content.
+- [x] Receiving an accession ID - Expected outcome: Accession ID is present in the database
 
-Scenarii
-~~~~~~~~
+Robustness Scenarios
+^^^^^^^^^^^^^^^^^^^^
 
-Here follow the different scenarii we currently test, using a Gherkin-style description.
+These tests will not treat the system as a black box.
+They require some knowledge on how the components are interconnected.
 
-.. literalinclude:: /../docker/tests/src/test/resources/cucumber/features/authentication.feature
-   :language: gherkin
-   :lines: 1-20
+- [ ] Check Archive+DB consistency - Expected outcome: Re-checksums the files after several ingestions
+- [x] (skipped) DB restarted after *n* seconds - Expected outcome: Combining an ingestion before and one after, the latest one should still "work"
+- [x] (skipped) DB restarted in the middle of an ingestion - Expected outcome: File ingested as usual
+- [x] (skipped) MQ restarted, test delivery mode -Expected outcome: queued tasks completed
+- [ ] Retry message 3 times if rejected before error or timeout - Expected outcome: queued tasks completed
+- [x] (skipped) Restart some component X - Expected outcome: Business as usual
 
-.. literalinclude:: /../docker/tests/src/test/resources/cucumber/features/ingestion.feature
-   :language: gherkin
-   :lines: 1-25,38-
+Stress Scenarios
+^^^^^^^^^^^^^^^^
 
-.. literalinclude:: /../docker/tests/src/test/resources/cucumber/features/uploading.feature
-   :language: gherkin
+These tests treat the system as a black box and "measure" performance
 
-..
-   .. literalinclude:: /../docker/tests/src/test/resources/cucumber/features/checksums.feature
-      :language: gherkin
+- [ ] Multiple ingestions by the same user
+- [ ] Ingestions by multiple users
+- [ ] (Auto?)-Scaling
+  
+Security Scenarios
+^^^^^^^^^^^^^^^^^^
 
-.. literalinclude:: /../docker/tests/src/test/resources/cucumber/features/robustness.feature
-   :language: gherkin
-   :lines: 1-15
+These tests will not treat the system as a black box.
+They require some knowledge on how the components are interconnected.
+
+- [ ] Network access forbidden from some selected components
+- [x] Inbox user isolation: A user cannot access the files of another user -Expected outcome: File not found or access denied
