@@ -63,7 +63,7 @@ Getting started
    :name: setup
 
    Getting started                   <setup>
-   Deployments and Local Bootstrap   <bootstrap>
+   Deployments and Local Bootstrap   <deploy>
 
 Information about the Architecture
 ----------------------------------
