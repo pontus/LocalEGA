@@ -17,10 +17,16 @@ in the figure below.
    :align: center
    :alt: General Architecture and Connected Components
 
+The components/microservices can be classified into:
+
+- submission - used in the process on submitting and ingesting data.
+- data retrieval - used for data retrieval/download.
+
 .. raw:: html
    :file: table.html
 
-The overall data workflow consists of two three parts:
+
+The overall data workflow consists of three parts:
 
 - The user first logs onto the Local EGA's inbox and uploads the
   encrypted files. He/She then goes to the Central EGA's interface to prepare a
