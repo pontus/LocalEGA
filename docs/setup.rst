@@ -67,6 +67,3 @@ interface.
    :alt: Kibana
 
 
-.. _NBIS Github repo: https://github.com/NBISweden/LocalEGA
-.. _Docker: https://github.com/NBISweden/LocalEGA/tree/dev/docker
-.. _OpenStack cloud: https://github.com/NBISweden/LocalEGA-deploy-terraform
