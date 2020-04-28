@@ -1,5 +1,7 @@
 body { overflow-x: initial !important; } /* Fix readthedocs bug */
 
+.wy-nav-content {max-width: 1100px;}
+
 .bolditalic { font-weight: bold; font-style:italic; }
 
 /* footer * { display:none; } */
