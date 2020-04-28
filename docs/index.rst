@@ -1,95 +1,103 @@
-Throughout this documentation, we can refer to Central EGA as
-``CEGA``, or ``CentralEGA``, and *any* Local EGA instance as ``LEGA``,
-or ``LocalEGA``.  When two or more Local EGA instances are involved,
-we will use ``LEGA<i>`` for Local EGA instance ``<i>``.
+.. note:: Throughout this documentation, we can refer to `Central EGA <https://ega-archive.org/>`_ as
+         ``CEGA``, or ``CentralEGA``, and *any* Local EGA instance as ``LEGA``,
+         or ``LocalEGA``.  When two or more Local EGA instances are involved,
+         we will use ``LEGA<i>`` for Local EGA instance ``<i>``.
+         In the context of NeIC we will refer to the LocalEGA as the 
+         ``Sensitive Data Archive`` or ``SDA``.
 
-================
-Local EGA
-================
+===========================
+NeIC Sensitive Data Archive
+===========================
 
-The Local EGA project is divided into several microservices.
+NeIC Sensitive Data Archive is divided into several microservices as illustrated
+in the figure below.
+
+.. figure:: https://docs.google.com/drawings/d/e/2PACX-1vQ5EMrwMb8X7efk_luHlkB1l1TEpTwuh-B2_c0SAoqPb5nSulKmt2cJj6ptt8oFFBHs2LLt8FHMl5VP/pub?w=960&h=540
+   :width: 750
+   :align: center
+   :alt: General Architecture and Connected Components
 
 .. raw:: html
    :file: table.html
 
-The workflow consists of two ordered parts:
+The overall data workflow consists of two three parts:
 
-The user first logs onto the Local EGA's inbox and uploads its
-files. He/She then goes to the Central EGA's interface to prepare a
-submission. Upon completion, the files are ingested into the archive and
-become searchable by the Central EGA's engine.
+- The user first logs onto the Local EGA's inbox and uploads the
+  encrypted files. He/She then goes to the Central EGA's interface to prepare a
+  submission;
+- Upon submission completion, the files are ingested into the archive and
+  become searchable by the Central EGA's engine;
+- Once the file has been successfully archived, with proper permissions given
+  by te Data Access Comitte the file(s) can be accessed by researchers.
 
 ----
 
-More concretely, Central EGA contains a database of users. The Central
-EGA' ID is used to authenticate the user against either their EGA
-password or an RSA key.
+Central EGA contains a database of users with permissions to upload to 
+a specific Sensitive Data Archive. The Central EGA' ID is used to authenticate 
+the user against either their EGA password or an private key.
 
 For every uploaded file, Central EGA receives a notification that the
-file has landed. The file is checksumed and presented in the Central
+file is present in an SDA's inbox. 
+The uploaded file must be encrypted in the :download:`Crypt4GH file format
+<http://samtools.github.io/hts-specs/crypt4gh.pdf>` using that SDA public
+Crypt4gh key.
+The file is checksumed and presented in the Central
 EGA's interface in order for the user to double-check that it was
 properly uploaded.
 
-|moreabout| More details about the :ref:`inbox login system`.
+More details about process in :ref:`inboxlogin`.
 
 When a submission is ready, Central EGA triggers an ingestion process
-on the user-chosen Local EGA instance. The uploaded file must be
-encrypted in the :download:`Crypt4GH file format
-<./static/crypt4gh.pdf>` using that Local EGA's public PGP
-key. Central EGA's interface is updated with progress notifications
+on the user-chosen SDA instance. Central EGA's interface is updated with progress notifications
 whether the ingestion was successful, or whether there was an error.
 
-|moreabout| More details about the :ref:`ingestion process`.
-
-.. image:: /static/components.svg
-   :target: ./_static/components.svg
-   :alt: General Architecture and Connected Components
+More details about the :ref:`ingestion process`.
 
 ----
 
 Getting started
-===============
+---------------
 
 .. toctree::
    :maxdepth: 2
    :name: setup
 
-   Getting started      <setup>
-   Bootstrap & Deploy   <bootstrap>
+   Getting started                   <setup>
+   Deployments and Local Bootstrap   <bootstrap>
 
 Information about the Architecture
-==================================
+----------------------------------
 
 .. toctree::
    :maxdepth: 2
    :name: architecture
 
-   Inbox                <inbox>
-   Ingestion            <ingestion>
-   Encryption           <encryption>
-   Keyserver            <keyserver>
-   Database             <db>
-   CEGA from/to LEGA    <connection>
+   Encryption Algorithm      <encryption>
+   Inbox                     <inbox>
+   Ingestion                 <ingestion>
+   Database Setup            <db>
+   Interfacing with CEGA     <connection>
 
 Miscellaneous
-=============
+-------------
 
 .. toctree::
    :maxdepth: 1
    :name: extra
 
+   Logging              <logging>
    Python Modules       <code>
-   Testsuite            <tests>
-   Contributing         <CONTRIBUTING>
+   Testing              <tests>
+   Contributing         <https://github.com/neicnordic/LocalEGA/blob/master/CONTRIBUTING.md>
 
-|Codacy| | |Travis| | Version |version| | Generated |today|
+|Coveralls| | |Github Actions| | Version |version| | Generated |today|
 
 
-.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/3dd83b28ec2041889bfb13641da76c5b
-	:alt: Codacy Badge
+.. |Coveralls| image:: https://coveralls.io/repos/github/neicnordic/LocalEGA/badge.svg?branch=master
+	:alt: Coveralls Badge
 	:class: inline-baseline
 
-.. |Travis| image:: https://travis-ci.org/NBISweden/LocalEGA.svg?branch=dev
+.. |Github Actions| image:: https://github.com/neicnordic/LocalEGA/workflows/Integration%20Tests/badge.svg
 	:alt: Build Status
 	:class: inline-baseline
 
