@@ -1,7 +1,18 @@
 .. _cega_lega:
 
-Connection CEGA |connect| LEGA
-==============================
+Interfacing with CEGA |connect| LEGA
+====================================
+
+
+.. _`mq`:
+
+Local Message Broker
+--------------------
+
+https://github.com/neicnordic/LocalEGA-mq
+
+Central EGA connection
+----------------------
 
 All Local EGA instances are connected to Central EGA using
 `RabbitMQ`_, a message broker, that allows application components to
@@ -12,18 +23,18 @@ The RabbitMQ message brokers of each LocalEGA are the **only**
 components with the necessary credentials to connect to Central
 EGA, the other LocalEGA components are not.
 
-We call ``CegaMQ`` and ``LegaMQ``, the RabbitMQ message brokers of,
+We call ``CegaMQ`` and ``LocalMQ``, the RabbitMQ message brokers of,
 respectively, Central EGA and Local EGA.
 
 .. note:: We pinned the RabbitMQ version to ``3.6.14``.
 
 
-``CegaMQ`` declares a ``vhost`` for each LocalEGA instance. It also
+``CegaMQ`` declares a ``vhost`` for each SDA instance. It also
 creates the credentials to connect to that ``vhost`` in the form of a
 *username/password* pair. The connection uses the AMQP(S) protocol
 (The S adds TLS encryption to the traffic).
 
-``LegaMQ`` then uses a connection string with the following syntax:
+``LocalMQ`` then uses a connection string with the following syntax:
 
 .. code-block:: console
 
@@ -47,10 +58,8 @@ use the stub implementation of CentralEGA and the following queues, per
 +-----------------+------------------------------------+
 | inbox           | Notifications of uploaded files    |
 +-----------------+------------------------------------+
-| inbox.checksums | Checksum values for uploaded files |
-+-----------------+------------------------------------+
 
-``LegaMQ`` contains two exchanges named ``lega`` and ``cega``, and the following queues, in the default ``vhost``:
+``LocalMQ`` contains two exchanges named ``lega`` and ``cega``, and the following queues, in the default ``vhost``:
 
 +-----------------+---------------------------------------+
 | Name            | Purpose                               |
@@ -59,24 +68,21 @@ use the stub implementation of CentralEGA and the following queues, per
 +-----------------+---------------------------------------+
 | archived        | The file is in the archive            |
 +-----------------+---------------------------------------+
-| qc              | The file is "verified" in the archive |
-|                 | and Quality Controllers can execute   |
-+-----------------+---------------------------------------+
 
-``LegaMQ`` registers ``CegaMQ`` as an *upstream* and listens to the
+``LocalMQ`` registers ``CegaMQ`` as an *upstream* and listens to the
 incoming messages in ``files`` using a *federated queue*.  Ingestion
 workers listen to the ``files`` queue of the local broker. If there
-are no messages to work on, ``LegaMQ`` will ask its upstream queue if
+are no messages to work on, ``LocalMQ`` will ask its upstream queue if
 it has messages. If so, messages are moved downstream. If not,
 ingestion workers wait for messages to arrive.
 
 .. note:: This gives us the ability to ingest files coming from
    CentralEGA, as well as files coming from other instances.  For
-   example, we could drop an ingestion message into ``LegaMQ``'s files
+   example, we could drop an ingestion message into ``LocalMQ``'s files
    queue in order to ingest files that are external to CentralEGA.
 
 
-``CegaMQ`` receives notifications from ``LegaMQ`` using a
+``CegaMQ`` receives notifications from ``LocalMQ`` using a
 *shovel*. Everything that is published to its ``cega`` exchange gets
 forwarded to CentralEGA (using the same routing key). This is how we
 propagate the different status of the workflow to CentralEGA, using
@@ -90,8 +96,6 @@ the following routing keys:
 | files.error           | In case a user-related error is detected              |
 +-----------------------+-------------------------------------------------------+
 | files.inbox           | In case a file is (re)uploaded                        |
-+-----------------------+-------------------------------------------------------+
-| files.inbox.checksums | In case a file path ends in ``.md5`` or ``.sha256``   |
 +-----------------------+-------------------------------------------------------+
 
 Note that we do not need at the moment a queue to store the completed
