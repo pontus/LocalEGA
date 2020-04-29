@@ -3,8 +3,8 @@ Deployments and Local Bootstrap
 
 We use different deployment strategies for environments
 like Docker Swarm, Kubernetes or a local-machine. The local machine 
-environment is recommeneded for development and testing, while Kubernetes
-and Docker Swarm for production. 
+environment is recommended for development and testing, while `Kubernetes <https://kubernetes.io/>`_
+and `Docker Swarm <https://docs.docker.com/engine/swarm/>`_ for production. 
 
 The production deployment repositories are:
 
