@@ -117,6 +117,101 @@ Essentially, it's a Spring-based Maven project, integrated with the :ref:`mq`.
 S3 Proxy Inbox
 --------------
 
+The S3 Proxy uses access tokens as the main authentication mechanism.
+
+The sda authentication service (https://github.com/NBISweden/sda-auth) is designed to convert
+CEGA REST endpoint authentication to a JWT that can be used when uploading to the S3 proxy.
+
+The proxy requires the user to set the bucket name the same as the username when uploading data,
+``s3cmd put FILE s3://USER_NAME/path/to/file``
+
+Configuration
+^^^^^^^^^^^^^
+
+The S3 proxy server can be configured via a yaml formatted file with the
+top level blocks, ``aws:``, ``broker:`` and ``server:``.
+
+ENVs take precedence over file based configurations.
+
+
+Environment variables used:
+
++----------------------+--------------------+--------------------------+
+| Variable name        | Default value      | Description              |
++======================+====================+==========================+
+| AWS_URL              |                    | Inbox S3 backend URL     |
++----------------------+--------------------+--------------------------+
+| AWS_ACCESSKEY        |                    | Inbox S3 backend access  |
+|                      |                    | key                      |
++----------------------+--------------------+--------------------------+
+| AWS_SECRETKEY        |                    | Inbox S3 backend secret  |
+|                      |                    | key                      |
++----------------------+--------------------+--------------------------+
+| AWS_REGION           | us-east-1          | Inbox S3 backend region  |
++----------------------+--------------------+--------------------------+
+| AWS_BUCKET           |                    | S3 backend bucket name   |
++----------------------+--------------------+--------------------------+
+| AWS_READYPATH        |                    | Path on the S3 backend   |
+|                      |                    | that reports readiness   |
++----------------------+--------------------+--------------------------+
+| AWS_CACERT           |                    | CA file to useif the S3  |
+|                      |                    | backend is private       |
++----------------------+--------------------+--------------------------+
+| BROKER_HOST          |                    | RabbitMQ broker host     |
++----------------------+--------------------+--------------------------+
+| BROKER_USER          |                    | RabbitMQ broker          |
+|                      |                    | username                 |
++----------------------+--------------------+--------------------------+
+| BROKER_PASSWORD      |                    | RabbitMQ broker          |
+|                      |                    | password                 |
++----------------------+--------------------+--------------------------+
+| BROKER_PORT          |                    | RabbitMQ broker port     |
++----------------------+--------------------+--------------------------+
+| BROKER_VHOST         |                    | RabbitMQ broker vhost    |
++----------------------+--------------------+--------------------------+
+| BROKER_exchange      |                    | RabbitMQ exchange to     |
+|                      |                    | publish to               |
++----------------------+--------------------+--------------------------+
+| BROKER_ROUTINGKEY    |                    | Routing key used when    |
+|                      |                    | publishing messages      |
++----------------------+--------------------+--------------------------+
+| BROKER_SSL           |                    | Use AMQPS for broker     |
+|                      |                    | connection               |
++----------------------+--------------------+--------------------------+
+| BROKER_CACERT        |                    | CA cert used for broker  |
+|                      |                    | connectivity             |
++----------------------+--------------------+--------------------------+
+| BROKER_VERIFYPEER    |                    | Enforce mTLS for broker  |
+|                      |                    | connection               |
++----------------------+--------------------+--------------------------+
+| BROKER_CLIENTCERT    |                    | Client cert used for     |
+|                      |                    | beoker connectivity      |
++----------------------+--------------------+--------------------------+
+| BROKER_CLINETKEY     |                    | Client key used for      |
+|                      |                    | broker connectivity      |
++----------------------+--------------------+--------------------------+
+| SERVER_CERT          |                    | Certificate for the S3   |
+|                      |                    | endpoint                 |
++----------------------+--------------------+--------------------------+
+| SERVER_KEY           |                    | Certificate key for the  |
+|                      |                    | S3 endpoint              |
++----------------------+--------------------+--------------------------+
+| SERVER_JWTPUBKEYPATH |                    | Path to the folder where |
+|                      |                    | the public JWT key is    |
+|                      |                    | located                  |
++----------------------+--------------------+--------------------------+
+| SERVER_JWTPUBEYURL   |                    | URL to the jwk endpoint  |
+|                      |                    | of the OIDC server       |
++----------------------+--------------------+--------------------------+
+| SERVER_CONFPATH      | .                  | Path to the folder       |
+|                      |                    | where the config file    |
+|                      |                    | can be found             |
++----------------------+--------------------+--------------------------+
+| SERVER_CONFFILE      | config.yaml        | Full path to the server  |
+|                      |                    | config file              |
++----------------------+--------------------+--------------------------+
+
+Sources are located at the separate repo: https://github.com/neicnordic/S3-Upload-Proxy
 
 .. _tsd-file-api:
 
