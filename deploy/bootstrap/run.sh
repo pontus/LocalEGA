@@ -57,6 +57,15 @@ source ${HERE}/defs.sh
 [[ -x $(readlink ${OPENSSL}) ]] && echo "${OPENSSL} is not executable. Adjust the setting with --openssl" && exit 3
 [[ -x $(readlink ${PYTHONEXEC}) ]] && echo "${PYTHONEXEC} is not executable. Adjust the setting with --pythonexec" && exit 3
 
+for prog in keytool expect crypt4gh-keygen; do
+    if type -p "$prog" >/dev/null  ; then
+        :
+    else
+        echo "Could not find $prog, please make sure it's installed and in PATH"
+        exit 1
+    fi	
+done
+
 rm_politely ${PRIVATE}
 mkdir -p ${PRIVATE}
 exec 2>${PRIVATE}/.err
