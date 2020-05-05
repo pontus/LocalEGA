@@ -1,7 +1,6 @@
 .. note:: Throughout this documentation, we can refer to `Central EGA <https://ega-archive.org/>`_ as
          ``CEGA``, or ``CentralEGA``, and *any* Local EGA instance as ``LEGA``,
-         or ``LocalEGA``.  When two or more Local EGA instances are involved,
-         we will use ``LEGA<i>`` for Local EGA instance ``<i>``.
+         or ``LocalEGA``.
          In the context of NeIC we will refer to the LocalEGA as the 
          ``Sensitive Data Archive`` or ``SDA``.
 
@@ -69,6 +68,7 @@ Getting started
    :name: setup
 
    Getting started                   <setup>
+   Database Setup                    <db>
    Deployments and Local Bootstrap   <deploy>
 
 Information about the Architecture
