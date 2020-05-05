@@ -1,38 +1,56 @@
-.. _cega_lega:
+Interfacing with CEGA |connect| SDA
+===================================
 
-Interfacing with CEGA |connect| LEGA
-====================================
+All Local EGA instances are connected to Central EGA using
+`RabbitMQ`_, a Message Broker, that allows the components to
+send and receive messages, which are queued, not lost, and resent
+on network failure or connection problems.
 
+The RabbitMQ message brokers of each SDA instance are the **only**
+components with the necessary credentials to connect to Central EGA
+message broker.
+
+We call ``CEGAMQ`` and ``LocalMQ`` (Local Message Broker), 
+the RabbitMQ message brokers of, respectively, ``Central EGA``
+and ``SDA``/``LocalEGA``.
 
 .. _`mq`:
 
 Local Message Broker
 --------------------
 
-https://github.com/neicnordic/LocalEGA-mq
+.. note:: Source code repository for MQ component is available at: https://github.com/neicnordic/LocalEGA-mq
+
+
+Configuration
+^^^^^^^^^^^^^
+
+The following environment variables can be used to configure the broker:
+
+.. note:: We use `RabbitMQ 3.7.8`_ including the management plugins.
+
++----------------------+----------------------------------------------+
+| Variable             | Description                                  |
++======================+==============================================+
+| ``MQ_VHOST``         | Default vhost other than ``/``               |
++----------------------+----------------------------------------------+
+| ``MQ_VERIFY``        | Set to ``verify_none`` to disable            |
+|                      | verification of client certificate           |
++----------------------+----------------------------------------------+
+| ``MQ_USER``          | Default user (with admin rights)             |
++----------------------+----------------------------------------------+
+| ``MQ_PASSWORD_HASH`` | Password hash for the above user             |
++----------------------+----------------------------------------------+
+| ``CEGA_CONNECTION``  | DSN URL for the shovels and federated queues |
+|                      | with CentralEGA                              |
++----------------------+----------------------------------------------+
 
 Central EGA connection
 ----------------------
 
-All Local EGA instances are connected to Central EGA using
-`RabbitMQ`_, a message broker, that allows application components to
-send and receive messages. Messages are queued, not lost, and resend
-on network failure or connection problems. Naturally, this is configurable.
-
-The RabbitMQ message brokers of each LocalEGA are the **only**
-components with the necessary credentials to connect to Central
-EGA, the other LocalEGA components are not.
-
-We call ``CegaMQ`` and ``LocalMQ``, the RabbitMQ message brokers of,
-respectively, Central EGA and Local EGA.
-
-.. note:: We pinned the RabbitMQ version to ``3.6.14``.
-
-
-``CegaMQ`` declares a ``vhost`` for each SDA instance. It also
+``CEGAMQ`` declares a ``vhost`` for each SDA instance. It also
 creates the credentials to connect to that ``vhost`` in the form of a
-*username/password* pair. The connection uses the AMQP(S) protocol
-(The S adds TLS encryption to the traffic).
+*username/password* pair. The connection uses the AMQP(S) protocol.
 
 ``LocalMQ`` then uses a connection string with the following syntax:
 
@@ -41,11 +59,9 @@ creates the credentials to connect to that ``vhost`` in the form of a
    amqp[s]://<user>:<password>@<cega-host>:<port>/<vhost>
 
 
-``CegaMQ`` contains an exchange named ``localega.v1``. ``v1`` is used for
+``CEGAMQ`` contains an exchange named ``localega.v1``. ``v1`` is used for
 versioning and is internal to CentralEGA. The queues connected to that
-exchange are also internal to CentralEGA. For this documentation, we
-use the stub implementation of CentralEGA and the following queues, per
-``vhost``:
+exchange are also internal to CentralEGA. 
 
 +-----------------+------------------------------------+
 | Name            | Purpose                            |
@@ -59,7 +75,8 @@ use the stub implementation of CentralEGA and the following queues, per
 | inbox           | Notifications of uploaded files    |
 +-----------------+------------------------------------+
 
-``LocalMQ`` contains two exchanges named ``lega`` and ``cega``, and the following queues, in the default ``vhost``:
+``LocalMQ`` contains two exchanges named ``lega`` and ``cega``,
+and the following queues, in the default ``vhost``:
 
 +-----------------+---------------------------------------+
 | Name            | Purpose                               |
@@ -68,21 +85,20 @@ use the stub implementation of CentralEGA and the following queues, per
 +-----------------+---------------------------------------+
 | archived        | The file is in the archive            |
 +-----------------+---------------------------------------+
+| stableIDs       | Receive Accession IDs from ``CEGAMQ`` |
++-----------------+---------------------------------------+
 
-``LocalMQ`` registers ``CegaMQ`` as an *upstream* and listens to the
+``LocalMQ`` registers ``CEGAMQ`` as an *upstream* and listens to the
 incoming messages in ``files`` using a *federated queue*.  Ingestion
 workers listen to the ``files`` queue of the local broker. If there
 are no messages to work on, ``LocalMQ`` will ask its upstream queue if
-it has messages. If so, messages are moved downstream. If not,
-ingestion workers wait for messages to arrive.
+it has messages. If so, messages are moved downstream. If not the 
+Ingest Service will wait for messages to arrive.
 
-.. note:: This gives us the ability to ingest files coming from
-   CentralEGA, as well as files coming from other instances.  For
-   example, we could drop an ingestion message into ``LocalMQ``'s files
-   queue in order to ingest files that are external to CentralEGA.
+.. note:: In order to start a standalone instance of the ``SDA``.
 
 
-``CegaMQ`` receives notifications from ``LocalMQ`` using a
+``CEGAMQ`` receives notifications from ``LocalMQ`` using a
 *shovel*. Everything that is published to its ``cega`` exchange gets
 forwarded to CentralEGA (using the same routing key). This is how we
 propagate the different status of the workflow to CentralEGA, using
@@ -95,12 +111,9 @@ the following routing keys:
 +-----------------------+-------------------------------------------------------+
 | files.error           | In case a user-related error is detected              |
 +-----------------------+-------------------------------------------------------+
-| files.inbox           | In case a file is (re)uploaded                        |
-+-----------------------+-------------------------------------------------------+
 
 Note that we do not need at the moment a queue to store the completed
-message, nor the errors, as we directly forward them to Central
-EGA. They can be added later on, if necessary.
+message, nor the errors, as we forward them to Central EGA.
 
 
 .. image:: /static/CEGA-LEGA.png
@@ -109,8 +122,8 @@ EGA. They can be added later on, if necessary.
 
 .. _supported checksum algorithm: md5
 
-Adding a new Local EGA instance
--------------------------------
+Connecting SDA to Central EGA
+-----------------------------
 
 Central EGA only has to prepare a user/password pair along with a
 ``vhost`` in their RabbitMQ.
@@ -125,58 +138,64 @@ LocalEGA instance, on the given ``vhost``.
 The exchanges and routing keys will be the same as all the other
 LocalEGA instances, since the clustering is done per ``vhost``.
 
+.. _`message`:
+
 Message Format
---------------
+^^^^^^^^^^^^^^
 
 It is necessary to agree on the format of the messages exchanged
 between Central EGA and any Local EGAs. Central EGA's messages are
-JSON-formatted and contain the following fields:
+JSON-formatted.
 
-* ``user``
-* ``filepath``
-* ``stable_id``
-* (optionally) ``encrypted_integrity``:
+When a ``Submission Inbox`` sends a message to CentralEGA it contanins the
+following:
 
-  - ``checksum``
-  - ``algorithm``
+.. code-block:: javascript
 
-LocalEGA instances must return messages containing:
+   {
+      "user":"john",
+      "filepath":"somedir/encrypted.file.gpg",
+      "encrypted_checksums": [
+         { "type": "md5", "value": "abcdefghijklmnopqrstuvwxyz"},
+         { "type": "sha256", "value": "12345678901234567890"}
+      ]
+   }
 
-* ``user``
-* ``filepath``
-* ``stable_id``
-* ``status``:
+CentralEGA triggers the ingestion and the message sent to ``files`` queue 
+contains the same information. 
 
-  - ``state``
-  - ``details``
+.. important:: The ``encrypted_checksums`` key is optional. If the key is not present
+               the sha256 checksum will be calculated by ``Ingest`` service.
 
-where ``state`` is either 'COMPLETED' or 'ERROR' (in which case,
-'details' contains an informal text description).
 
-For example, CentralEGA could send:
+The ``Ingest`` service upon successful operation will send a message to
+``archived`` queue containing: 
 
-.. code-block:: json
+.. code-block:: javascript
 
-    {
-      "user": "john",
-      "filepath": "somedir/encrypted.file.gpg",
-      "stable_id": "EGAF0123456789012345"
-    }
+   {
+      "user":"john",
+      "filepath":"somedir/encrypted.file.gpg",
+      "file_checksum": "abcdefghijklmnopqrstuvwxyz"
+   }
 
-and LocalEGA could respond with:
+``Verify`` service will consume set message and will forward to ``completed`` queue
+and *shoveled* to ``CEGAMQ``, which will respond with the same content, but adding
+the `Accession ID`.
 
-.. code-block:: json
+.. code-block:: javascript
 
-		{
-		   "user":"john",
-		   "filepath":"somedir/encrypted.file.gpg",
-		   "stable_id": "EGAF0123456789012345",
-		   "status":{
-		      "state":"COMPLETED",
-		      "details":"File ingested, refer to it with EGAF0123456789012345"
-		   }
-		}
+   {
+      "user":"john",
+      "filepath":"somedir/encrypted.file.gpg",
+      "file_checksum": "abcdefghijklmnopqrstuvwxyz",
+      "stable_id": "EGAF001"
+   }
+
+``Finalize`` service will read this message and assign the `Accession ID` to the
+corresponding file.
 
 
 .. |connect| unicode:: U+21cc .. <->
 .. _RabbitMQ: http://www.rabbitmq.com
+.. _RabbitMQ 3.7.8: https://hub.docker.com/_/rabbitmq
