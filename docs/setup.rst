@@ -24,6 +24,8 @@ the setup for those components is detailed in:
 - :ref:`db`;
 - :ref:`mq`.
 
+:ref:`data out` requires a working Database in order to be set up.
+
 A few files are required in order to connect the different components.
 
 The main configurations are set by default, and it is possible to
