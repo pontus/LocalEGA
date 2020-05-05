@@ -10,10 +10,8 @@ engine, with Poly1305 authentication mode. For each segment of at most
 segment. Using the two latters, the original file is segmented and
 each segment is encrypted.
 
-The header is prepended to the encrypted data.
-
-Informally, the header contains, the word ``crypt4gh``, the
-format version, the number of header packets, and the sequence of header packets.
+The header is prepended to the encrypted data, it also contains, the word ``crypt4gh``,
+the format version, the number of header packets, and the sequence of header packets.
 
 A header packet consists of length followed by its content. 
 The content can be a data encryption packet or an edit list packet.
@@ -23,7 +21,6 @@ All packets are encrypted using a Curve25519-based encryption.
 .. image:: /static/crypt4gh_structure.png
    :target: http://samtools.github.io/hts-specs/crypt4gh.pdf
    :alt: Crypt4GH Encryption
-
 
 The advantages of the format are, among others:
 
