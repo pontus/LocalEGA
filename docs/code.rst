@@ -1,6 +1,6 @@
---------------
-Python Modules
---------------
+
+Submission Components
+=====================
 
 .. automodule:: lega
    :members:
@@ -14,9 +14,8 @@ Python Modules
     lega.verify
     lega.finalize
 
-****************
 Ingestion Worker
-****************
+----------------
 
 .. automodule:: lega.ingest
    :members:
@@ -25,9 +24,8 @@ Ingestion Worker
 .. automodule:: lega.finalize
    :members:
 
-*****************
 Utility Functions
-*****************
+-----------------
 
 .. automodule:: lega.utils
 
@@ -39,8 +37,9 @@ Utility Functions
     lega.utils.db
     lega.utils.storage
     lega.utils.exceptions
+    lega.utils.key
     lega.utils.logging
 
-
+.. include:: tests.rst
 
 :ref:`genindex` | :ref:`modindex`

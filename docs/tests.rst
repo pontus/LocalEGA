@@ -1,5 +1,5 @@
 Testing
-=======
+-------
 
 We have implemented 2 types of testsuite: 
 
@@ -14,7 +14,7 @@ will utilize the system as a whole, .
 
 
 Unit Tests
-----------
+^^^^^^^^^^
 
 Unit tests are minimal: Given a set of input values for a chosen
 function, they execute the function and check if the output has the
@@ -32,13 +32,13 @@ Unit tests can in parellel be run using the ``tox`` commands.
     $ tox -p auto
 
 Integration Tests
------------------
+^^^^^^^^^^^^^^^^^
 
 Unit Tests are run with pytest, coverage and tox.
 The other tests use `BATS <https://github.com/bats-core/bats-core>`_.
 
 Integration Scenarios
-^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""
 
 These tests treat the system as a black box, only checking the expected output for a given input.
 
@@ -55,7 +55,7 @@ These tests treat the system as a black box, only checking the expected output f
 - [x] Receiving an accession ID - Expected outcome: Accession ID is present in the database
 
 Robustness Scenarios
-^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""
 
 These tests will not treat the system as a black box.
 They require some knowledge on how the components are interconnected.
@@ -68,7 +68,7 @@ They require some knowledge on how the components are interconnected.
 - [x] (skipped) Restart some component X - Expected outcome: Business as usual
 
 Stress Scenarios
-^^^^^^^^^^^^^^^^
+""""""""""""""""
 
 These tests treat the system as a black box and "measure" performance
 
@@ -77,7 +77,7 @@ These tests treat the system as a black box and "measure" performance
 - [ ] (Auto?)-Scaling
   
 Security Scenarios
-^^^^^^^^^^^^^^^^^^
+""""""""""""""""""
 
 These tests will not treat the system as a black box.
 They require some knowledge on how the components are interconnected.

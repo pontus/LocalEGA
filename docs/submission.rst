@@ -1,10 +1,57 @@
 .. _`inboxlogin`:
 
-Inbox Login System
-==================
+Data Submission
+===============
+
+.. _`ingestion process`:
+
+Ingestion Procedure
+-------------------
+
+For a given LocalEGA, Central EGA selects the associated ``vhost`` and
+drops, in the ``files`` queue, one message per file to ingest.  A
+message contains the *username*, the *filename* and *stable
+id*. Optionally, it can also contain a *checksum* (along with the
+related algorithm) of the encrypted file. The message is picked up by
+some ingestion workers. Several ingestion workers may be running
+concurrently at any given time.
+
+For each file, if it is found in the inbox, checksums are computed to
+verify the integrity of the file (ie. whether the file was properly
+uploaded), in case the ``do_checksum`` is set the ``True`` in the
+configuration settings. If the checksum is not provided, it will be
+derived from a companion file.
+
+We leverage the Crypt4GH format. Each worker reads an inbox file and
+strips the Crypt4GH header from the beginning of the file, puts it in
+a database and sends the remainder to a backend store. There is no
+decryption key retrieved during that step. The backend store can be
+either a regular file system on disk, or an S3 object storage.
+
+The files are read chunk by chunk in order to bound the memory
+usage. After completion, the remainder of the file (the AES encrypted
+bulk part) is in the archive and a message is dropped into the local
+message broker to signal that the next step can start.
+
+The next step is a verification step to ensure that the stored file is
+decryptable and that the integrated checksum is valid. At that stage,
+the associated decryption key is retrieved in a secure manner, from
+the keyserver, and the header is decrypted using it. The output
+contains the necessary information (such as the session key) to
+recuperate the original file. If decryption completes and the checksum
+is valid, a message of completion is sent to Central EGA: Ingestion
+completed.
+
+If any of the above steps generates an error, we exit the workflow and
+log the error. In case the error is related to a misuse from the user,
+such as submitting the wrong checksum or tempering with the encrypted
+file, the error is forwarded to Central EGA in order to be displayed
+for the user.
+
+Submission Inbox
+----------------
 
 Central EGA contains a database of users, with IDs and passwords.
-
 We have developed several solutions allowing user authentication 
 against CentralEGA user database:
 
@@ -12,11 +59,11 @@ against CentralEGA user database:
 * :ref:`s3-inbox`;
 * :ref:`tsd-file-api`.
 
-Each solution uses CentralEGA's user IDs but can also be extended to
+Each solution uses CentralEGA's user IDs, but is also be extended to
 use Elixir IDs (of which we strip the ``@elixir-europe.org`` suffix).
 
 The procedure is as follows: the inbox is started without any created
-user. When a user wants to log into the inbox (via ``sftp``, s3 or ``https``),
+user. When a user wants to log into the inbox (via ``sftp``, ``s3`` or ``https``),
 the inbox service looks up the username in a local queries the CentralEGA REST endpoint. 
 Upon return, we store the user credentials in the local cache and create
 the user's home directory. The user now gets logged in if the password
@@ -25,7 +72,7 @@ or public key authentication succeeds.
 .. _apache-mina-inbox:
 
 Apache Mina Inbox
------------------
+^^^^^^^^^^^^^^^^^
 
 This solution makes use of `Apache Mina SSHD project <https://mina.apache.org/sshd-project/>`_,
 the user is locked within their home folder, which is done by using ``RootedFileSystem``.
@@ -37,7 +84,7 @@ checksum. This information is provided to CentralEGA via a
 We can configure default cache TTL via ``CACHE_TTL`` environment variable.
 
 Configuration
-^^^^^^^^^^^^^
+"""""""""""""
 
 Environment variables used:
 
@@ -115,7 +162,7 @@ Essentially, it's a Spring-based Maven project, integrated with the :ref:`mq`.
 .. _s3-inbox:
 
 S3 Proxy Inbox
---------------
+^^^^^^^^^^^^^^
 
 The S3 Proxy uses access tokens as the main authentication mechanism.
 
@@ -126,7 +173,7 @@ The proxy requires the user to set the bucket name the same as the username when
 ``s3cmd put FILE s3://USER_NAME/path/to/file``
 
 Configuration
-^^^^^^^^^^^^^
+"""""""""""""
 
 The S3 proxy server can be configured via a yaml formatted file with the
 top level blocks, ``aws:``, ``broker:`` and ``server:``.
@@ -213,7 +260,18 @@ Environment variables used:
 
 Sources are located at the separate repo: https://github.com/neicnordic/S3-Upload-Proxy
 
+
 .. _tsd-file-api:
 
 TSD File API
-------------
+^^^^^^^^^^^^
+
+In order to utilise Tryggve2 SDA within `TSD <https://www.uio.no/english/services/it/research/sensitive-data/>`_
+Several components have been developed:
+
+* https://github.com/unioslo/tsd-file-api
+* https://github.com/uio-bmi/LocalEGA-TSD-proxy
+* https://github.com/unioslo/tsd-api-client
+
+.. note:: Access is restricted to UiO network. Please, contact TSD support for the access, if needed.
+          Documentation: https://test.api.tsd.usit.no/v1/docs/tsd-api-integration.html

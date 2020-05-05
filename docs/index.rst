@@ -79,10 +79,9 @@ Information about the Architecture
    :name: architecture
 
    Encryption Algorithm      <encryption>
-   Inbox                     <inbox>
-   Ingestion                 <ingestion>
-   Database Setup            <db>
+   Data Submission           <submission>
    Interfacing with CEGA     <connection>
+   SDA Data Retrieval API    <dataout>
 
 Miscellaneous
 -------------
@@ -91,10 +90,9 @@ Miscellaneous
    :maxdepth: 1
    :name: extra
 
-   Logging              <logging>
-   Python Modules       <code>
-   Testing              <tests>
-   Contributing         <https://github.com/neicnordic/LocalEGA/blob/master/CONTRIBUTING.md>
+   Logging                   <logging>
+   Submission Components     <code>
+   Contributing              <https://github.com/neicnordic/LocalEGA/blob/master/CONTRIBUTING.md>
 
 |Coveralls| | |Github Actions| | Version |version| | Generated |today|
 
