@@ -71,9 +71,9 @@ Configuration
 | BLIC_KEY_PATH |                              | key for passport JWT |
 |               |                              | validation           |
 +---------------+------------------------------+----------------------+
-| OPENID_CONF   | https://logi                 | URL of the OpenID    |
-| IGURATION_URL | n.elixir-czech.org/oidc/.wel | configuration        |
-|               | l-known/openid-configuration | endpoint             |
+| OPENID_CONF   |                              | URL of the OpenID    |
+| IGURATION_URL |                              | configuration        |
+|               |                              | endpoint             |
 +---------------+------------------------------+----------------------+
 | VISA_PU       | /etc/ega/jwt/visa.pem        | Path to the public   |
 | BLIC_KEY_PATH |                              | key for visas JWT    |
@@ -108,6 +108,9 @@ Handling Permissions
 Data Out API can be run with connection to an AAI or without.
 In the case connection to an AAI provider is not possible the ``PASSPORT_PUBLIC_KEY_PATH`` and
 ``CRYPT4GH_PRIVATE_KEY_PATH`` need to be set.
+
+.. note:: By default we use Elixir AAI as JWT for authentication
+          ``OPENID_CONFIGURATION_URL`` is set to: https://login.elixir-czech.org/oidc/.well-known/openid-configuration
 
 If connected to an AAI provider the current implementation is based on 
 `GA4GH Passports <https://github.com/ga4gh/data-security/blob/master/AAI/AAIConnectProfile.md>`_

@@ -50,7 +50,8 @@ extensions = ['sphinx.ext.autodoc',
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['templates']
 
-linkcheck_ignore = [r'https://logi', r'https://test.api.tsd.usit.no/*']
+linkcheck_ignore = [r'https://login.elixir-czech.org/oidc/.well-known/openid-configuration',
+                    r'https://test.api.tsd.usit.no/*']
 
 
 # The suffix(es) of source filenames.
