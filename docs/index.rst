@@ -1,5 +1,5 @@
 .. note:: Throughout this documentation, we can refer to `Central EGA <https://ega-archive.org/>`_ as
-         ``CEGA``, or ``CentralEGA``, and *any* Local EGA instance as ``LEGA``,
+         ``CEGA``, or ``CentralEGA``, and *any* Local EGA (also known as Federated EGA) instance as ``LEGA``,
          or ``LocalEGA``.
          In the context of NeIC we will refer to the LocalEGA as the 
          ``Sensitive Data Archive`` or ``SDA``.
@@ -58,6 +58,10 @@ whether the ingestion was successful, or whether there was an error.
 
 More details about the :ref:`ingestion process`.
 
+Once a file has been successfully submitted and the ingestion process has been finlised,
+including receiving an `Accession ID` from Central EGA. The Data Out API can be
+utilised to retrieve set file by utilising the `Accession ID`. More details in :ref:`data out`.
+
 ----
 
 Getting started
@@ -81,7 +85,7 @@ Information about the Architecture
    Encryption Algorithm      <encryption>
    Data Submission           <submission>
    Interfacing with CEGA     <connection>
-   SDA Data Retrieval API    <dataout>
+   Data Retrieval API        <dataout>
 
 Miscellaneous
 -------------
@@ -97,7 +101,7 @@ Miscellaneous
 |Coveralls| | |Github Actions| | Version |version| | Generated |today|
 
 
-.. |Coveralls| image:: https://coveralls.io/repos/github/neicnordic/LocalEGA/badge.svg?branch=master
+.. |Coveralls| image:: https://coveralls.io/repos/github/neicnordic/LocalEGA/badge.svg?branch=HEAD
 	:alt: Coveralls Badge
 	:class: inline-baseline
 
