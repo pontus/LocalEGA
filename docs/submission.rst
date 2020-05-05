@@ -8,45 +8,38 @@ Data Submission
 Ingestion Procedure
 -------------------
 
+.. note:: Source code repository for Submission components is available at: https://github.com/neicnordic/LocalEGA
+
 For a given LocalEGA, Central EGA selects the associated ``vhost`` and
-drops, in the ``files`` queue, one message per file to ingest.  A
-message contains the *username*, the *filename* and *stable
-id*. Optionally, it can also contain a *checksum* (along with the
-related algorithm) of the encrypted file. The message is picked up by
-some ingestion workers. Several ingestion workers may be running
-concurrently at any given time.
+drops, in the ``files`` queue, one message per file to ingest. 
 
-For each file, if it is found in the inbox, checksums are computed to
-verify the integrity of the file (ie. whether the file was properly
-uploaded), in case the ``do_checksum`` is set the ``True`` in the
-configuration settings. If the checksum is not provided, it will be
-derived from a companion file.
+Structure of the message and its contents are described in :ref:`message`.
 
-We leverage the Crypt4GH format. Each worker reads an inbox file and
-strips the Crypt4GH header from the beginning of the file, puts it in
-a database and sends the remainder to a backend store. There is no
-decryption key retrieved during that step. The backend store can be
-either a regular file system on disk, or an S3 object storage.
+The ``Ingest`` services (can be replicated) reads file from the ``Submission Inbox``
+and splits Crypt4GH header from the beginning of the file, puts it in
+a database and sends the remainder to the ``Archive``, leveraging the Crypt4GH format. 
+
+.. hint:: There is no decryption key retrieved during that step. The ``Archive`` can be
+          either a regular file system on disk, or an S3 object storage.
+          ``Submission Inbox`` can also be also have as a backend a regular file system
+          or S3 object storage.
 
 The files are read chunk by chunk in order to bound the memory
-usage. After completion, the remainder of the file (the AES encrypted
-bulk part) is in the archive and a message is dropped into the local
-message broker to signal that the next step can start.
+usage. After completion, a message is dropped into the local
+message broker to signal that the ``Verify`` service can check the file corresponds
+to what was submitted. It also ensures that the stored file is
+decryptable and that the integrated checksum is valid. 
 
-The next step is a verification step to ensure that the stored file is
-decryptable and that the integrated checksum is valid. At that stage,
-the associated decryption key is retrieved in a secure manner, from
-the keyserver, and the header is decrypted using it. The output
-contains the necessary information (such as the session key) to
-recuperate the original file. If decryption completes and the checksum
-is valid, a message of completion is sent to Central EGA: Ingestion
-completed.
+At this stage, the associated decryption key is retrieved in a secure manner 
+If decryption completes and the checksum is valid, a message of completion 
+is sent to Central EGA: Ingestion completed.
+
+.. important:: If a file has been submitted twice one of them would be invalidated.
 
 If any of the above steps generates an error, we exit the workflow and
 log the error. In case the error is related to a misuse from the user,
 such as submitting the wrong checksum or tempering with the encrypted
-file, the error is forwarded to Central EGA in order to be displayed
-for the user.
+file, the error is forwarded to Central EGA in order to be displayed in the Submission Interface.
 
 Submission Inbox
 ----------------
@@ -155,14 +148,16 @@ Environment variables used:
 
 As mentioned above, the implementation is based on Java library Apache Mina SSHD.
 
-Sources are located at the separate repo: https://github.com/neicnordic/LocalEGA-inbox
-Essentially, it's a Spring-based Maven project, integrated with the :ref:`mq`.
+.. note:: Sources are located at the separate repo: https://github.com/neicnordic/LocalEGA-inbox
+          Essentially, it's a Spring-based Maven project, integrated with the :ref:`mq`.
 
 
 .. _s3-inbox:
 
 S3 Proxy Inbox
 ^^^^^^^^^^^^^^
+
+.. note:: Sources are located at the separate repo: https://github.com/neicnordic/S3-Upload-Proxy
 
 The S3 Proxy uses access tokens as the main authentication mechanism.
 
@@ -257,8 +252,6 @@ Environment variables used:
 | SERVER_CONFFILE      | config.yaml        | Full path to the server  |
 |                      |                    | config file              |
 +----------------------+--------------------+--------------------------+
-
-Sources are located at the separate repo: https://github.com/neicnordic/S3-Upload-Proxy
 
 
 .. _tsd-file-api:
