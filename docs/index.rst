@@ -94,7 +94,6 @@ Miscellaneous
    :maxdepth: 1
    :name: extra
 
-   Logging                   <logging>
    Submission Components     <code>
    Contributing              <https://github.com/neicnordic/LocalEGA/blob/master/CONTRIBUTING.md>
 
