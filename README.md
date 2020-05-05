@@ -10,12 +10,12 @@ This is a fork of https://github.com/EGA-archive/LocalEGA adapted for NeIC Trygg
 
 The [code](lega) is written in Python (3.6+).
 
-One can provision and deploy the different components, locally, using [docker-compose](deploy).
+Recommended provisioning methods provided for production are:
 
-Other provisioning methods provided:
-
-* on a [Kubernetes](https://github.com/neicnordic/sda-helm/), using `kubernetes` and `helm` charts;
+* on a [Kubernetes cluster](https://github.com/neicnordic/sda-helm/), using `kubernetes` and `helm` charts;
 * on a [Docker Swarm cluster](https://github.com/neicnordic/LocalEGA-deploy-swarm), using `gradle` and `docker swarm`.
+
+One can provision and deploy the different components, locally, using [docker-compose](deploy).
 
 # Architecture
 
