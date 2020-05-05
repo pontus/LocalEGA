@@ -3,8 +3,8 @@
     <tr>
       <th>Service</th>
       <th>Description</th>
+      <th>Usage</th>
       <th>Status</th>
-      <th>Step</th>
     </tr>
   </thead>
   <tbody>
@@ -12,8 +12,8 @@
       <td>db</td>
       <td>A Postgres database with appropriate schema, stores the file header
       the accession id, file path and checksums as well as other relevant information.</td>
+      <td>Submission and Data Retrieval</td>
       <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
-      <td>Submission</td>
     </tr>
     <tr>
       <td>mq</td>
@@ -21,48 +21,56 @@
       exchanges, queues and bindings. We use a federated queue to get
       messages from CentralEGA's broker and shovels to send answers
       back.</td>
-      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
       <td>Submission</td>
+      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
     </tr>
     <tr>
       <td>Inbox</td>
       <td>SFTP server, acting as a dropbox, where user credentials come from Central EGA</td>
-      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
       <td>Submission</td>
+      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
     </tr>
     <tr>
       <td>Ingest</td>
       <td>Split the Crypt4GH header and move it to database and move the remainder to the
       storage backend (archive). No cryptographic task required.</td>
-      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
       <td>Submission</td>
+      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
     </tr>
     <tr>
       <td>Verify</td>
       <td>Using a crypt4gh secret key can decrypt the stored
       files and checksum them against their embedded checksum.</td>
-      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
       <td>Submission</td>
+      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
     </tr>
     <tr>
       <td>Archive</td>
       <td>Storage backend: as a regular file system or as a S3 object store.</td>
-      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
       <td>Submission and Data Retrieval</td>
+      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
     </tr>
     <tr>
       <td>Finalize</td>
-      <td>Also called <b>ID Mapper</b> handles the so-called <i>Accession ID</i> filename mappings from CentralEGA.
+      <td>Also called handles the so-called <i>Accession ID (stable ID)</i> to filename mappings from CentralEGA
       store.</td>
-      <td><i class="fa fa-battery-half ega-dev" title="Working, but still under development"></i></td>
       <td>Submission</td>
+      <td><i class="fa fa-battery-full ega-stable" title="Stable"></i></td>
     </tr>
     <tr>
     <td>Data Out API</td>
       <td>Provides a download/data access API for streaming archived data 
-        either in encrypted format or decrypted.</td>
-      <td><i class="fa fa-battery-half ega-dev" title="Working, but still missing htsget and datasets mapping"></i></td>
+        either in encrypted or decrypted format.</td>
       <td>Data Retrieval</td>
+      <td><i class="fa fa-battery-half ega-dev" title="Working, but still missing htsget and datasets mapping"></i></td>
+    </tr>
+    <tr>
+    <td>Metadata</td>
+      <td>Component used in standalone version of SDA. Provides an interface and backend to submit Metadata
+        and associated with a file in the Archive.
+      </td>
+      <td>Submission Data Retrieval</td>
+      <td><i class="fa fa-battery-half ega-dev" title="Work in progress"></i></td>
     </tr>
   </tbody>
 </table>
