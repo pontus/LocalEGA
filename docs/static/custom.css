@@ -1,6 +1,6 @@
 body { overflow-x: initial !important; } /* Fix readthedocs bug */
 
-.wy-nav-content {max-width: 1100px;}
+.wy-nav-content {max-width: 1000px;}
 
 .bolditalic { font-weight: bold; font-style:italic; }
 
@@ -19,3 +19,18 @@ body { overflow-x: initial !important; } /* Fix readthedocs bug */
 
 #ega thead { text-align:left; }
 #ega thead tr th { padding: 0.5em; border: 1px solid #e1e4e5; background-color: #cfd0d0;}
+
+
+/* override table width restrictions */
+@media screen and (min-width: 767px) {
+
+    .wy-table-responsive table td {
+       /* !important prevents the common CSS stylesheets from overriding
+          this as on RTD they are loaded after this stylesheet */
+       white-space: normal !important;
+    }
+ 
+    .wy-table-responsive {
+       overflow: visible !important;
+    }
+ }
