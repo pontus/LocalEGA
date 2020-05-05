@@ -9,7 +9,7 @@ and `Docker Swarm <https://docs.docker.com/engine/swarm/>`_ for production.
 The production deployment repositories are:
 
 * `Kubernetes Helm charts <https://github.com/neicnordic/sda-helm/>`_;
-* `Docker Swarm <https://github.com/neicnordic/LocalEGA-deploy-swarm/>`_.
+* `Docker Swarm deployment <https://github.com/neicnordic/LocalEGA-deploy-swarm/>`_.
 
 The following container images are used in the deployments:
 
