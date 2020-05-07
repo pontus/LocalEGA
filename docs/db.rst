@@ -128,7 +128,7 @@ This table keeps records of file submission errors, including information about 
 +-------------+-------------+
 | msg         | text        |
 +-------------+-------------+
-| occured_at  | timestamptz |
+| occurred_at | timestamptz |
 +-------------+-------------+
 
 session_key_checksums_sha256
@@ -273,19 +273,19 @@ success
 ^^^^^^^
 A record of all successfully downloaded files.
 
-+-------------+-------------+
-| Column Name | Data type   |
-+=============+=============+
-| bytes       | int8        |
-+-------------+-------------+
-| id          | int4        |
-+-------------+-------------+
-| occured_at  | timestamptz |
-+-------------+-------------+
-| req_id      | int4        |
-+-------------+-------------+
-| speed       | float8      |
-+-------------+-------------+
++-------------+--------------+
+| Column Name | Data type    |
++=============+==============+
+| bytes       | int8         |
++-------------+--------------+
+| id          | int4         |
++-------------+--------------+
+| occurred_at | timestamptz  |
++-------------+--------------+
+| req_id      | int4         |
++-------------+--------------+
+| speed       | float8       |
++-------------+--------------+
 
 errors
 ^^^^^^
@@ -302,7 +302,7 @@ A record of all errors occurred during file requests, including the hostname and
 +-------------+-------------+
 | id          | int4        |
 +-------------+-------------+
-| occured_at  | timestamptz |
+| occurred_at | timestamptz |
 +-------------+-------------+
 | req_id      | int4        |
 +-------------+-------------+
