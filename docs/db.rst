@@ -330,3 +330,57 @@ It inserts a new request or reuses and old request entry of a given file.
 
 * Inputs: stable id, user information, client ip, start coordinate and end coordinate
 * Target: local_ega_download.requests
+
+local_ega_ebi tables
+^^^^^^^^^^^^^^^^^^^^
+
+.. image:: /static/localega-ebi-schema.svg
+   :target: ./_static/localega-ebi-schema.svg
+   :alt: localega EBI database schema
+
+filedataset
+"""""""""""
+It contains all entries that relate to EBI Files and Datasets.
+
++-------------------+-----------+
+| Column Name       | Data type |
++===================+===========+
+| dataset_stable_id | text      |
++-------------------+-----------+
+| file_id           | int4      |
++-------------------+-----------+
+| id                | int4      |
++-------------------+-----------+
+
+fileindexfile
+"""""""""""""
+It contains all entries that relate to EBI Files and File indexes.
+
++----------------------+-----------+
+| Column Name          | Data type |
++======================+===========+
+| file_id              | int4      |
++----------------------+-----------+
+| id                   | int4      |
++----------------------+-----------+
+| index_file_id        | text      |
++----------------------+-----------+
+| index_file_reference | text      |
++----------------------+-----------+
+| index_file_type      | storage   |
++----------------------+-----------+
+
+local_ega_ebi views
+^^^^^^^^^^^^^^^^^^^^
+
+file
+""""
+View for EBI Data-Out which contains all local_ega.main entries marked as ready.
+
+file_dataset
+""""""""""""
+Used to synchronise with the entity eu.elixir.ega.ebi.downloader.domain.entity.FileDataset.
+
+file_index_file
+"""""""""""""""
+Used to synchronise with the entity eu.elixir.ega.ebi.downloader.domain.entity.FileIndexFile.
