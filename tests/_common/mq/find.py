@@ -70,7 +70,7 @@ while True:
         message = {'non-json message' : body.decode()}
 
     if correlation_id in messages:  # we looped
-        break
+        continue
     messages[correlation_id] = (message_id, message)
 
 
