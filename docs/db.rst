@@ -235,7 +235,7 @@ It synchronises the timestamp for each row after update on main.
 
 mark_ready
 """"""""""
-It removes all errors of a given entry after it is marked as READY.
+When triggered after a file is marked as READY, it deactivates all errors of the given entry.
 
 * Inputs: None
 * Target: mark_ready
