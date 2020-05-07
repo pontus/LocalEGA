@@ -51,14 +51,14 @@ For TLS support use the variables below:
            Client verification is enforced if and only if ``PG_CA`` exists and ``PG_VERIFY_PEER`` is set to ``1``.
 
 local_ega tables
-----------------
+^^^^^^^^^^^^^^^^
 
 .. image:: /static/localega-schema.svg
    :target: ./_static/localega-schema.svg
    :alt: localega database schema
 
 main
-^^^^
+""""
 This is the core table of the schema, which holds file identifiers, status, metadata, submission paths and checksum information, archive type information and cryptographic information.
 
 +------------------------------------------+--------------------+
@@ -108,7 +108,7 @@ This is the core table of the schema, which holds file identifiers, status, meta
 +------------------------------------------+--------------------+
 
 errors
-^^^^^^
+""""""
 This table keeps records of file submission errors, including information about the submitter and if the submission is active and also the hostname and the error type.
 
 +-------------+-------------+
@@ -132,7 +132,7 @@ This table keeps records of file submission errors, including information about 
 +-------------+-------------+
 
 session_key_checksums_sha256
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""
 Checksums are recorded in order to keep track of already used session keys,
 
 +---------------------------+--------------------+
@@ -146,7 +146,7 @@ Checksums are recorded in order to keep track of already used session keys,
 +---------------------------+--------------------+
 
 status
-^^^^^^
+""""""
 This table holds file statuses, which can range from INIT, IN_INGESTION, ARCHIVED, COMPLETED, READY, ERROR and DISABLED.
 
 +-------------+-----------+
@@ -160,7 +160,7 @@ This table holds file statuses, which can range from INIT, IN_INGESTION, ARCHIVE
 +-------------+-----------+
 
 archive_encryption
-^^^^^^^^^^^^^^^^^^
+""""""""""""""""""
 It holds the cryptographic strategy used by the archive.
 
 +-------------+-----------+
@@ -172,83 +172,83 @@ It holds the cryptographic strategy used by the archive.
 +-------------+-----------+
 
 local_ega views
----------------
+^^^^^^^^^^^^^^^
 
 archive_files
-^^^^^^^^^^^^^
+"""""""""""""
 
 It contains all entries from the main table which are marked as ready.
 
 errors
-^^^^^^
+""""""
 
 It contains error entries from active file submissions.
 
 files
-^^^^^
+"""""
 
 It mirrors the main table containing all records of submitted files.
 
 
 local_ega functions
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 check_session_keys_checksums_sha256
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""
 It returns if the session key checksums are already found in the database.
 
 * Inputs: checksums
 
 finalize_file
-^^^^^^^^^^^^^
+"""""""""""""
 It flags files as READY, by setting their stable id and marking older ingestions as deprecated.
 
 * Inputs: inbox_path, elixir_id, archive_file_checksum, archive_file_checksum_type, stable_id
 * Target: local_ega.files
 
 insert_error
-^^^^^^^^^^^^
+""""""""""""
 It adds an error entry of a file submission.
 
 * Inputs: file_id, hostname, error_type, msg, from_user
 * Target: local_ega.errors
 
 insert_file
-^^^^^^^^^^^
+"""""""""""
 It adds a new file entry and deprecates old faulty submissions of the same file if present.
 
 * Inputs: submission_file_path, submission_user
 * Target: local_ega.main
 
 is_disabled
-^^^^^^^^^^^
+"""""""""""
 It returns whether a given entry is disabled or not.
 
 * Input: file id:
 
 main_updated
-^^^^^^^^^^^^
+""""""""""""
 It synchronises the timestamp for each row after update on main.
 
 * Input: None
 * Target: local_ega.main
 
 mark_ready
-^^^^^^^^^^
+""""""""""
 It removes all errors of a given entry after it is marked as READY.
 
 * Inputs: None
 * Target: mark_ready
 
 local_ega_download tables
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: /static/localega-download-schema.svg
    :target: ./_static/localega-download-schema.svg
    :alt: localega download database schema
 
 requests
-^^^^^^^^
+""""""""
 It keeps track of all requests made to the file archive, including the requested file chunks and client information.
 
 +------------------+-------------+
@@ -270,7 +270,7 @@ It keeps track of all requests made to the file archive, including the requested
 +------------------+-------------+
 
 success
-^^^^^^^
+"""""""
 A record of all successfully downloaded files.
 
 +-------------+--------------+
@@ -288,7 +288,7 @@ A record of all successfully downloaded files.
 +-------------+--------------+
 
 errors
-^^^^^^
+""""""
 A record of all errors occurred during file requests, including the hostname and the error code.
 
 +-------------+-------------+
@@ -308,15 +308,15 @@ A record of all errors occurred during file requests, including the hostname and
 +-------------+-------------+
 
 local_ega_download functions
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 download_complete
-^^^^^^^^^^^^^^^^^
+"""""""""""""""""
 It marks a file download as complete, and calculates the download speed.
 Inputs: requested file id, download size, speed
 Target: local_ega_download.success
 
 insert_error
-^^^^^^^^^^^^
+""""""""""""
 
 It adds an error entry of a file download.
 
@@ -324,10 +324,9 @@ It adds an error entry of a file download.
 * Target: local_ega_download.errors
 
 make_request
-^^^^^^^^^^^^
+""""""""""""
 
 It inserts a new request or reuses and old request entry of a given file.
 
 * Inputs: stable id, user information, client ip, start coordinate and end coordinate
 * Target: local_ega_download.requests
-
