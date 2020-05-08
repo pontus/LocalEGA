@@ -153,6 +153,7 @@ following:
 .. code-block:: javascript
 
    {
+      "operation": "upload",
       "user":"john",
       "filepath":"somedir/encrypted.file.gpg",
       "encrypted_checksums": [
@@ -160,6 +161,13 @@ following:
          { "type": "sha256", "value": "12345678901234567890"}
       ]
    }
+
+In order to identify the type of inbox activity, 
+``operation`` in the above message can the values:
+
+* ``upload`` - when a file is uploaded;
+* ``remove`` - when a file is deleted;
+* ``rename`` - when a file is renamed.
 
 CentralEGA triggers the ingestion and the message sent to ``files`` queue 
 contains the same information. 
