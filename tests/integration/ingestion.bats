@@ -92,6 +92,41 @@ function teardown() {
     [[ "$output" =~ "reason: Session key (likely) already used." ]]
 }
 
+# Upload 2 files with the same name (with ingestion inbetween)
+# ----------------------------------------------
+# This is done by uploading the same file twice.
+
+@test "Ingest two files with the same name" {
+    TESTFILE=$(uuidgen)
+    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+
+    # generate a file
+    lega_generate_file "1_${TESTFILE}" "/${TESTFILES}/1_${TESTFILE}.c4gh" 1 /dev/urandom
+
+    # Upload twice
+    lega_upload "/${TESTFILES}/1_${TESTFILE}.c4gh" "${TESTFILE_UPLOADED}"
+
+    # First time
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.completed 30 10
+
+    # Flush queue so we don't get the same old correlation id.
+    legarun ${MQ_PURGE} --queues v1.files.inbox
+
+    # generate a file
+    lega_generate_file "2_${TESTFILE}" "/${TESTFILES}/2_${TESTFILE}.c4gh" 2 /dev/urandom
+
+    # Upload second file with same name
+    lega_upload "/${TESTFILES}/2_${TESTFILE}.c4gh" "${TESTFILE_UPLOADED}"
+
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.completed 30 10
+
+    legarun query_db local_ega.main status "submission_file_path='${TESTFILE_UPLOADED}'"
+    lines_with_completed=$(echo "$output" | grep COMPLETED | wc -l)
+
+    echo "Lines with completed is ***${lines_with_completed}***" >> ${DEBUG_LOG}
+    [ "${lines_with_completed}" -eq 2 ]
+}
+
 @test "Get an accession id" {
     
     lega_stable_id $(uuidgen) 10 v1.stableIDs
