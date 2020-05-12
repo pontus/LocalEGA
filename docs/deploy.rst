@@ -13,12 +13,12 @@ The production deployment repositories are:
 
 The following container images are used in the deployments:
 
-* ``neicnordic/sda-base``, and containing `python 3.6` and the LocalEGA services;
-* ``neicnordic/sda-mq`` (based on `rabbitmq:3.7.8-management`);
-* ``neicnordic/sda-db`` (based on `postgres:11.2`);
-* ``neicnordic/sda-inbox-sftp`` (based on Apache Mina);
-* ``neicnordic/sda-doa`` (Data Out API);
-* ``neicnordic/sda-s3-proxy`` (S3 proxy inbox).
+* ``neicnordic/sda-base``, provides the LocalEGA services (based on `python:3.6-alpine3.10`);
+* ``neicnordic/sda-mq``, provides the broker (mq) service (based on `rabbitmq:3.7.8-management`);
+* ``neicnordic/sda-db``, provides the database service (based on `postgres:11.2`);
+* ``neicnordic/sda-inbox-sftp``, provides the inbox service via sftp (based on Apache Mina);
+* ``neicnordic/sda-doa``, provides the data out service (Data Out API);
+* ``neicnordic/sda-s3-proxy``, provides the inbox service via a s3 proxy (S3 proxy inbox).
 
 In order to simplify the setup of SDA's components, we have
 developed a a bootstrap script (one for the `Docker`_ deployment).
