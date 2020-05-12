@@ -11,27 +11,27 @@ Ingestion Procedure
 .. note:: Source code repository for Submission components is available at: https://github.com/neicnordic/LocalEGA
 
 For a given LocalEGA, Central EGA selects the associated ``vhost`` and
-drops, in the ``files`` queue, one message per file to ingest. 
+drops, in the ``files`` queue, one message per file to ingest.
 
 Structure of the message and its contents are described in :ref:`message`.
 
-The ``Ingest`` services (can be replicated) reads file from the ``Submission Inbox``
+The ``Ingest`` service (can be replicated) reads file from the ``Submission Inbox``
 and splits Crypt4GH header from the beginning of the file, puts it in
-a database and sends the remainder to the ``Archive``, leveraging the Crypt4GH format. 
+a database and sends the remainder to the ``Archive``, leveraging the Crypt4GH format.
 
 .. hint:: There is no decryption key retrieved during that step. The ``Archive`` can be
           either a regular file system on disk, or an S3 object storage.
-          ``Submission Inbox`` can also be also have as a backend a regular file system
+          ``Submission Inbox`` can also have as a backend a regular file system
           or S3 object storage.
 
 The files are read chunk by chunk in order to bound the memory
 usage. After completion, a message is dropped into the local
 message broker to signal that the ``Verify`` service can check the file corresponds
 to what was submitted. It also ensures that the stored file is
-decryptable and that the integrated checksum is valid. 
+decryptable and that the integrated checksum is valid.
 
-At this stage, the associated decryption key is retrieved in a secure manner 
-If decryption completes and the checksum is valid, a message of completion 
+At this stage, the associated decryption key is retrieved in a secure manner
+If decryption completes and the checksum is valid, a message of completion
 is sent to Central EGA: Ingestion completed.
 
 .. important:: If a file has been submitted twice one of them would be invalidated.
@@ -45,19 +45,19 @@ Submission Inbox
 ----------------
 
 Central EGA contains a database of users, with IDs and passwords.
-We have developed several solutions allowing user authentication 
+We have developed several solutions allowing user authentication
 against CentralEGA user database:
 
 * :ref:`apache-mina-inbox`;
 * :ref:`s3-inbox`;
 * :ref:`tsd-file-api`.
 
-Each solution uses CentralEGA's user IDs, but is also be extended to
+Each solution uses CentralEGA's user IDs, but will also be extended to
 use Elixir IDs (of which we strip the ``@elixir-europe.org`` suffix).
 
 The procedure is as follows: the inbox is started without any created
 user. When a user wants to log into the inbox (via ``sftp``, ``s3`` or ``https``),
-the inbox service looks up the username in a local queries the CentralEGA REST endpoint. 
+the inbox service looks up the username in a local queries the CentralEGA REST endpoint.
 Upon return, we store the user credentials in the local cache and create
 the user's home directory. The user now gets logged in if the password
 or public key authentication succeeds.
@@ -130,7 +130,7 @@ Environment variables used:
 
 As mentioned above, the implementation is based on Java library Apache Mina SSHD.
 
-.. note:: Sources are located at the separate repo: https://github.com/neicnordic/LocalEGA-inbox
+.. note:: Sources are located at the separate repository: https://github.com/neicnordic/LocalEGA-inbox
           Essentially, it's a Spring-based Maven project, integrated with the :ref:`mq`.
 
 
@@ -139,7 +139,7 @@ As mentioned above, the implementation is based on Java library Apache Mina SSHD
 S3 Proxy Inbox
 ^^^^^^^^^^^^^^
 
-.. note:: Sources are located at the separate repo: https://github.com/neicnordic/S3-Upload-Proxy
+.. note:: Sources are located at the separate reposiroty: https://github.com/neicnordic/S3-Upload-Proxy
 
 The S3 Proxy uses access tokens as the main authentication mechanism.
 

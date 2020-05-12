@@ -1,7 +1,7 @@
 .. note:: Throughout this documentation, we can refer to `Central EGA <https://ega-archive.org/>`_ as
          ``CEGA``, or ``CentralEGA``, and *any* Local EGA (also known as Federated EGA) instance as ``LEGA``,
          or ``LocalEGA``.
-         In the context of NeIC we will refer to the LocalEGA as the 
+         In the context of NeIC we will refer to the LocalEGA as the
          ``Sensitive Data Archive`` or ``SDA``.
 
 ===========================
@@ -27,7 +27,7 @@ The components/microservices can be classified into:
 
 The overall data workflow consists of three parts:
 
-- The user first logs onto the Local EGA's inbox and uploads the
+- The user logs onto the Local EGA's inbox and uploads the
   encrypted files. He/She then goes to the Central EGA's interface to prepare a
   submission;
 - Upon submission completion, the files are ingested into the archive and
@@ -37,12 +37,12 @@ The overall data workflow consists of three parts:
 
 ----
 
-Central EGA contains a database of users with permissions to upload to 
-a specific Sensitive Data Archive. The Central EGA' ID is used to authenticate 
-the user against either their EGA password or an private key.
+Central EGA contains a database of users with permissions to upload to
+a specific Sensitive Data Archive. The Central EGA' ID is used to authenticate
+the user against either their EGA password or a private key.
 
 For every uploaded file, Central EGA receives a notification that the
-file is present in an SDA's inbox. 
+file is present in a SDA's inbox.
 The uploaded file must be encrypted in the :download:`Crypt4GH file format
 <http://samtools.github.io/hts-specs/crypt4gh.pdf>` using that SDA public
 Crypt4gh key.
@@ -58,7 +58,7 @@ whether the ingestion was successful, or whether there was an error.
 
 More details about the :ref:`ingestion process`.
 
-Once a file has been successfully submitted and the ingestion process has been finlised,
+Once a file has been successfully submitted and the ingestion process has been finalised,
 including receiving an `Accession ID` from Central EGA. The Data Out API can be
 utilised to retrieve set file by utilising the `Accession ID`. More details in :ref:`data out`.
 

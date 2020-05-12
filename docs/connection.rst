@@ -10,7 +10,7 @@ The RabbitMQ message brokers of each SDA instance are the **only**
 components with the necessary credentials to connect to Central EGA
 message broker.
 
-We call ``CEGAMQ`` and ``LocalMQ`` (Local Message Broker), 
+We call ``CEGAMQ`` and ``LocalMQ`` (Local Message Broker),
 the RabbitMQ message brokers of, respectively, ``Central EGA``
 and ``SDA``/``LocalEGA``.
 
@@ -61,7 +61,7 @@ creates the credentials to connect to that ``vhost`` in the form of a
 
 ``CEGAMQ`` contains an exchange named ``localega.v1``. ``v1`` is used for
 versioning and is internal to CentralEGA. The queues connected to that
-exchange are also internal to CentralEGA. 
+exchange are also internal to CentralEGA.
 
 +-----------------+------------------------------------+
 | Name            | Purpose                            |
@@ -92,7 +92,7 @@ and the following queues, in the default ``vhost``:
 incoming messages in ``files`` using a *federated queue*.  Ingestion
 workers listen to the ``files`` queue of the local broker. If there
 are no messages to work on, ``LocalMQ`` will ask its upstream queue if
-it has messages. If so, messages are moved downstream. If not the 
+it has messages. If so, messages are moved downstream. If not the
 Ingest Service will wait for messages to arrive.
 
 .. note:: In order to start a standalone instance of the ``SDA``.
@@ -147,7 +147,7 @@ It is necessary to agree on the format of the messages exchanged
 between Central EGA and any Local EGAs. Central EGA's messages are
 JSON-formatted.
 
-When a ``Submission Inbox`` sends a message to CentralEGA it contanins the
+When a ``Submission Inbox`` sends a message to CentralEGA it contains the
 following:
 
 .. code-block:: javascript
@@ -162,22 +162,22 @@ following:
       ]
    }
 
-In order to identify the type of inbox activity, 
-``operation`` in the above message can the values:
+In order to identify the type of inbox activity,
+``operation`` in the above message can have the following values:
 
 * ``upload`` - when a file is uploaded;
 * ``remove`` - when a file is deleted;
 * ``rename`` - when a file is renamed.
 
-CentralEGA triggers the ingestion and the message sent to ``files`` queue 
-contains the same information. 
+CentralEGA triggers the ingestion and the message sent to ``files`` queue
+contains the same information.
 
 .. important:: The ``encrypted_checksums`` key is optional. If the key is not present
                the sha256 checksum will be calculated by ``Ingest`` service.
 
 
 The ``Ingest`` service upon successful operation will send a message to
-``archived`` queue containing: 
+``archived`` queue containing:
 
 .. code-block:: javascript
 

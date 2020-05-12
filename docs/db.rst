@@ -46,7 +46,7 @@ For TLS support use the variables below:
 |        ``SSL_SUBJ`` | Subject for the self-signed certificate creation | `/C=SE/ST=Sweden/L=Uppsala/O=NBIS/OU=SysDevs/CN=LocalEGA` |
 +---------------------+--------------------------------------------------+-----------------------------------------------------------+
 
-.. note::  If not already injected, the files located at ``PG_SERVER_CERT`` 
+.. note::  If not already injected, the files located at ``PG_SERVER_CERT``
            and ``PG_SERVER_KEY`` will be generated, as a self-signed public/private certificate pair, using ``SSL_SUBJ``.
            Client verification is enforced if and only if ``PG_CA`` exists and ``PG_VERIFY_PEER`` is set to ``1``.
 
