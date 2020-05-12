@@ -21,7 +21,7 @@ The following container images are used in the deployments:
 * ``neicnordic/sda-s3-proxy``, provides the inbox service via a s3 proxy (S3 proxy inbox).
 
 In order to simplify the setup of SDA's components, we have
-developed a a bootstrap script (one for the `Docker`_ deployment).
+developed a a bootstrap script (for the `Docker`_ deployment case).
 The bootstrap deployment creates all the necessary configuration 
 simulating an deployment. The bootstrap is also used for integration testing
 
