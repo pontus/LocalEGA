@@ -4,7 +4,7 @@ Submission Components
 
 .. automodule:: lega
    :members:
-   :synopsis: The lega package contains code to start a *Local EGA*.
+   :synopsis: The lega python package contains code to provide a *Local EGA* service.
 
 .. autosummary::
 
