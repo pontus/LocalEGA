@@ -188,8 +188,21 @@ The ``Ingest`` service upon successful operation will send a message to
    }
 
 ``Verify`` service will consume set message and will forward to ``completed`` queue
-and *shoveled* to ``CEGAMQ``, which will respond with the same content, but adding
-the `Accession ID`.
+and *shoveled* to ``CEGAMQ`` but also adding a key ``decrypted_checksums``, 
+which will respond with the same content, but adding the `Accession ID`.
+
+{
+      "user":"john",
+      "filepath":"somedir/encrypted.file.gpg",
+      "file_checksum": "abcdefghijklmnopqrstuvwxyz",
+      "decrypted_checksums": [
+         { "type": "md5", "value": "abcdefghijklmnopqrstuvwxyz"},
+         { "type": "sha256", "value": "12345678901234567890"}
+      ]
+   }
+
+``Finalize`` service should receive the message below and assign the `Accession ID` to the
+corresponding file.
 
 .. code-block:: javascript
 
@@ -199,9 +212,6 @@ the `Accession ID`.
       "file_checksum": "abcdefghijklmnopqrstuvwxyz",
       "stable_id": "EGAF001"
    }
-
-``Finalize`` service will read this message and assign the `Accession ID` to the
-corresponding file.
 
 
 .. |connect| unicode:: U+21cc .. <->
