@@ -16,6 +16,11 @@ maintaining data privacy throughout the various stages.
   possibly reencrypted with a suitable key for the user (again, in
   addition to any transport encryption).
 
+Files submitted are in the ``Crypt4GH`` file format, which provides
+the ability to decrypt parts of encrypted files without having to
+start decrypt all data up to the desired area (useful for e.g.
+streaming).
+
 The details of the file format used are provided at :download:`Crypt4GH file format
 <http://samtools.github.io/hts-specs/crypt4gh.pdf>`, and summarized below.
 
