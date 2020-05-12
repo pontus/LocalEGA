@@ -83,7 +83,7 @@ Information about the Architecture
    :maxdepth: 2
    :name: architecture
 
-   Encryption Algorithm      <encryption>
+   Encryption                <encryption>
    Data Submission           <submission>
    Interfacing with CEGA     <connection>
    Data Retrieval API        <dataout>
@@ -95,7 +95,7 @@ Miscellaneous
    :maxdepth: 1
    :name: extra
 
-   Submission Components     <code>
+   LEGA Submission Code Components     <code>
    Contributing              <https://github.com/neicnordic/LocalEGA/blob/master/CONTRIBUTING.md>
 
 |Coveralls| | |Github Actions| | Version |version| | Generated |today|
