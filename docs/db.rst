@@ -5,10 +5,15 @@ Database Setup
 
 We use a Postgres database (version 11.6+ ) to store intermediate data,
 in order to track progress in file ingestion. The ``lega`` database
-schema is as follows.
+schema is documented below.
 
 .. note:: Source code repository for DB component is available at: https://github.com/neicnordic/LocalEGA-db
 
+The database container will initialize and create the necessary
+database structure and functions if started with an empty area.
+Procedures for *backing up the database* are important but considered
+out of scope for the secure data archive project.
+	  
 Look at `the SQL definitions
 <https://github.com/neicnordic/LocalEGA-db/tree/master/initdb.d>`_ if
 you are also interested in the database triggers.
