@@ -16,7 +16,7 @@ in the figure below.
    :align: center
    :alt: General Architecture and Connected Components
 
-The components/microservices can be classified into:
+The components/microservices can be classified by use case:
 
 - submission - used in the process on submitting and ingesting data.
 - data retrieval - used for data retrieval/download.
@@ -28,12 +28,13 @@ The components/microservices can be classified into:
 The overall data workflow consists of three parts:
 
 - The user logs onto the Local EGA's inbox and uploads the
-  encrypted files. He/She then goes to the Central EGA's interface to prepare a
+  encrypted files. They then go to the Central EGA's interface to prepare a
   submission;
 - Upon submission completion, the files are ingested into the archive and
   become searchable by the Central EGA's engine;
-- Once the file has been successfully archived, with proper permissions given
-  by te Data Access Comitte the file(s) can be accessed by researchers.
+- Once the file has been successfully archived, it can be accessed by
+  researchers in accordance with permissions given by the
+  corresponding Data Access Committee.
 
 ----
 
