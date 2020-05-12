@@ -5,17 +5,16 @@ The secure data archive uses public key cryptography extensively for
 maintaining data privacy throughout the various stages.
 
 - Files uploaded to the secure data archive are pre-encrypted (on the
-user side) with public key based cryptograhy (this is in addition to
-any transport encryption provided for the connection, e.g. TLS or the
-encryption provided by ssh for the sftp inbox service).
+  user side) with public key based cryptograhy (this is in addition to
+  any transport encryption provided for the connection, e.g. TLS or
+  the encryption provided by ssh for the sftp inbox service).
 
-- During the ingestion
-process, the files are decrypted and re-encrypted with another key to
-provide for the archiving.
+- During the ingestion process, the files are decrypted and
+  re-encrypted with another key to provide for the archiving.
 
-- Finally, if the data is requested, it is again decrypted and possibly
-reencrypted with a suitable key for the user (again, in addition to
-any transport encryption).
+- Finally, if the data is requested, it is again decrypted and
+  possibly reencrypted with a suitable key for the user (again, in
+  addition to any transport encryption).
 
 The details of the file format used are provided at :download:`Crypt4GH file format
 <http://samtools.github.io/hts-specs/crypt4gh.pdf>`, and summarized below.
