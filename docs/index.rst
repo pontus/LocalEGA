@@ -27,7 +27,7 @@ The components/microservices can be classified by use case:
 
 The overall data workflow consists of three parts:
 
-- The user logs onto the Local EGA's inbox and uploads the
+- The users logs onto the Local EGA's inbox and uploads the
   encrypted files. They then go to the Central EGA's interface to prepare a
   submission;
 - Upon submission completion, the files are ingested into the archive and
