@@ -1,6 +1,6 @@
 
-Submission Components
-=====================
+LEGA Submission Code Components
+===============================
 
 .. automodule:: lega
    :members:
