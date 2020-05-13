@@ -11,7 +11,7 @@ Ingestion Workflow
    :target: ./_static/ingestion-sequence.svg
    :alt: Ingestion sequence diagram
 
-The sequence diagram describes the different phases during the ingestion process. The elements at the top represent each of the services or actuators involved in the workflow. The interaction between these is depicted by horizontal arrows connecting the elements. The vertical axis represents time progression down the page, where processes are marked with colored vertical bars. The colors used for the services/actuators match those used for the events initiated by the respective services, except for the interactions in case of errors, which are highligted with red. The optional fragments are only executed if errors occur during ingestion, verify or finalize. Note that time in this diagram is all about ordering, not duration.
+The sequence diagram describes the different phases during the ingestion process. The elements at the top represent each of the services or actuators involved in the workflow. The interaction between these is depicted by horizontal arrows connecting the elements. The vertical axis represents time progression down the page, where processes are marked with colored vertical bars. The colors used for the services/actuators match those used for the events initiated by the respective services, except for the interactions in case of errors, which are highlighted with red. The optional fragments are only executed if errors occur during ingestion, verify or finalize. Note that time in this diagram is all about ordering, not duration.
 
 Ingestion Procedure
 -------------------
