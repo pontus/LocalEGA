@@ -46,6 +46,7 @@ These tests treat the system as a black box, only checking the expected output f
 - [x] Ingesting a 1 GB file - Expected outcome: Message in the CentralEGA completed queue
 - [x] Ingesting a directory with multiple files and/or subdirectories - Expected outcome: Messages in the CentralEGA completed queue
 - [x] Upload 2 files encrypted with same session key - Expected outcome: Message in the CentralEGA user-error queue for the second file
+- [x] Upload 2 files with the same name (with ingestion in-between)
 - [x] (skipped) Use 2 stable IDs for the same ingested file - Expected outcome: Error captured
 - [x] Ingest a file with a user that does not exist in CentralEGA - Expected outcome: Authentication "fails", and the ingestion does not start
 - [x] Ingest a file with a user in CentralEGA, using the wrong password - Expected outcome: Authentication "fails", and the ingestion does not start
