@@ -36,6 +36,7 @@ MQ_GET="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION}"
 MQ_GET_INBOX="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.inbox"
 MQ_GET_COMPLETED="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.completed"
 MQ_PUBLISH="python ${HERE}/mq/publish.py --connection ${CEGA_CONNECTION}"
+MQ_PURGE="python ${HERE}/mq/purge.py --connection ${CEGA_CONNECTION}"
 
 # Convenience function to capture _all_ outputs
 function legarun {
@@ -258,4 +259,19 @@ function lega_ingest {
     [ "$status" -eq 0 ]
 
     lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" $queue 30 10
+}
+
+function query_db {
+    local table=$1
+    local what=$2
+    local where=$3
+
+    if [ "x$what" = x ]; then
+	    what='*'
+    fi 
+    if [ "x$where" != x ]; then
+	  whereclause="where $where"
+    fi
+
+    PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select $what from $table $whereclause;"
 }
