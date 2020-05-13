@@ -1,5 +1,5 @@
 Encryption
-===============================
+==========
 
 The secure data archive uses public key cryptography extensively for
 maintaining data privacy throughout the various stages.
