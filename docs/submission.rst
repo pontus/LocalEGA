@@ -26,6 +26,7 @@ Ingestion Workflow
    The sequence diagram describes the different phases during the ingestion process. 
    The elements at the top represent each of the services or actuators involved in the workflow. 
    The interaction between these is depicted by horizontal arrows connecting the elements. 
+   
    The vertical axis represents time progression down the page, where processes are marked 
    with colored vertical bars. The colors used for the services/actuators match those used
    for the events initiated by the respective services, except for the interactions in case of errors, 
@@ -50,7 +51,7 @@ message broker to signal that the ``Verify`` service can check the file correspo
 to what was submitted. It also ensures that the stored file is
 decryptable and that the integrated checksum is valid.
 
-At this stage, the associated decryption key is retrieved in a secure manner
+At this stage, the associated decryption key is retrieved.
 If decryption completes and the checksum is valid, a message of completion
 is sent to Central EGA: Ingestion completed.
 
