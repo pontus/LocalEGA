@@ -159,7 +159,7 @@ As mentioned above, the implementation is based on Java library Apache Mina SSHD
 S3 Proxy Inbox
 ^^^^^^^^^^^^^^
 
-.. note:: Sources are located at the separate reposiroty: https://github.com/neicnordic/S3-Upload-Proxy
+.. note:: Sources are located at the separate repository: https://github.com/neicnordic/S3-Upload-Proxy
 
 The S3 Proxy uses access tokens as the main authentication mechanism.
 
