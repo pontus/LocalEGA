@@ -191,7 +191,9 @@ The ``Ingest`` service upon successful operation will send a message to
 and *shoveled* to ``CEGAMQ`` but also adding a key ``decrypted_checksums``, 
 which will respond with the same content, but adding the `Accession ID`.
 
-{
+.. code-block:: javascript
+   
+   {
       "user":"john",
       "filepath":"somedir/encrypted.file.gpg",
       "file_checksum": "abcdefghijklmnopqrstuvwxyz",
