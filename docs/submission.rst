@@ -3,25 +3,35 @@
 Data Submission
 ===============
 
-.. _`ingestion process`:
-
-Ingestion Workflow
-------------------
-.. image:: /static/ingestion-sequence.svg
-   :target: ./_static/ingestion-sequence.svg
-   :alt: Ingestion sequence diagram
-
-The sequence diagram describes the different phases during the ingestion process. The elements at the top represent each of the services or actuators involved in the workflow. The interaction between these is depicted by horizontal arrows connecting the elements. The vertical axis represents time progression down the page, where processes are marked with colored vertical bars. The colors used for the services/actuators match those used for the events initiated by the respective services, except for the interactions in case of errors, which are highlighted with red. The optional fragments are only executed if errors occur during ingestion, verify or finalize. Note that time in this diagram is all about ordering, not duration.
-
 Ingestion Procedure
 -------------------
-
-.. note:: Source code repository for Submission components is available at: https://github.com/neicnordic/LocalEGA
 
 For a given LocalEGA, Central EGA selects the associated ``vhost`` and
 drops, in the ``files`` queue, one message per file to ingest.
 
 Structure of the message and its contents are described in :ref:`message`.
+
+.. note:: Source code repository for Submission components is available at: https://github.com/neicnordic/LocalEGA
+
+.. _`ingestion process`:
+
+Ingestion Workflow
+^^^^^^^^^^^^^^^^^^
+.. image:: /static/ingestion-sequence.svg
+   :target: ./_static/ingestion-sequence.svg
+   :alt: Ingestion sequence diagram
+
+The sequence diagram describes the different phases during the ingestion process. 
+The elements at the top represent each of the services or actuators involved in the workflow. 
+The interaction between these is depicted by horizontal arrows connecting the elements. 
+The vertical axis represents time progression down the page, where processes are marked 
+with colored vertical bars. The colors used for the services/actuators match those used
+for the events initiated by the respective services, except for the interactions in case of errors, 
+which are highlighted with red. The optional fragments are only executed if errors occur during ingestion,
+verify or finalize. Note that time in this diagram is all about ordering, not duration.
+
+Ingestion Steps
+^^^^^^^^^^^^^^^
 
 The ``Ingest`` service (can be replicated) reads file from the ``Submission Inbox``
 and splits Crypt4GH header from the beginning of the file, puts it in
