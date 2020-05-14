@@ -80,7 +80,6 @@ class S3FileReader(object):
         self.info = s3.head_object(Bucket=bucket, Key=path)
         self.size = self.info['ContentLength']
 
-
         LOG.debug("New reader for Bucket: %s, Path: %s, Mode: %s", self.bucket, self.path, mode)
 
         # self.buffer = io.BytesIO() # cache
@@ -134,7 +133,7 @@ class S3FileReader(object):
     def close(self):
         """Close object reader."""
         LOG.debug("Closing reader for bucket: %s, path: %s", self.bucket, self.path)
-        
+
         if self.closed:
             return
         self.closed = True
