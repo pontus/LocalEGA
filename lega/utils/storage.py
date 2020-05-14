@@ -79,6 +79,10 @@ class S3FileReader(object):
         self.bucket = bucket
         self.info = s3.head_object(Bucket=bucket, Key=path)
         self.size = self.info['ContentLength']
+
+
+        LOG.debug("New reader for Bucket: %s, Path: %s, Mode: %s", self.bucket, self.path, mode)
+
         # self.buffer = io.BytesIO() # cache
         # self.blocksize = blocksize
         # # If file is less than 5MB, read it all in the buffer
@@ -92,6 +96,7 @@ class S3FileReader(object):
 
     def seek(self, loc, whence=0):
         """Change position to the given byte offset."""
+        LOG.Debug("Seeking in reader for bucket: %s, path: %s, loc: %d", self.bucket, self.path, loc)
         if whence == 0:  # from start
             nloc = loc
         elif whence == 1:  # from here
@@ -107,6 +112,8 @@ class S3FileReader(object):
 
     def read(self, length=-1):
         """Read and return up to size bytes."""
+        LOG.Debug("Reading from bucket: %s, path: %s", self.bucket, self.path)
+
         if self.closed:
             raise ValueError('I/O operation on closed file.')
 
@@ -118,11 +125,16 @@ class S3FileReader(object):
 
         end = min(self.loc + length, self.size)  # in case it's too much
         out = self._fetch(self.loc, end)
+
+        LOG.Debug("Reading from bucket: %s, path: %s returned %d bytes", self.bucket, self.path, len(out))
+
         self.loc += len(out)
         return out
 
     def close(self):
         """Close object reader."""
+        LOG.Debug("Closing reader for bucket: %s, path: %s", self.bucket, self.path)
+        
         if self.closed:
             return
         self.closed = True
@@ -171,7 +183,7 @@ class S3FileReader(object):
         # if end > self.size:
         #     end = self.size
         assert end <= self.size
-        # LOG.debug("Fetch: Bucket: %s, File=%s, Range: %s-%s, Chunk: %s", self.bucket, self.path, start, end, end-start)
+        LOG.debug("Fetch: Bucket: %s, File=%s, Range: %s-%s, Chunk: %s", self.bucket, self.path, start, end, end-start)
         for i in range(max_attempts):
             try:
                 resp = self.s3.get_object(Bucket=self.bucket, Key=self.path, Range='bytes=%i-%i' % (start, end - 1))
@@ -238,11 +250,14 @@ class S3Storage():
 
     def filesize(self, path):
         """Return the size of the file pointed by ``path``."""
+        LOG.Debug("filesize s3storage for bucket: %s, path: %s", self.bucket, self.path)
         resp = self.s3.head_object(Bucket=self.bucket, Key=path)
         return resp['ContentLength']
 
     def copy(self, fileobj, location):
         """Copy file object in a bucket."""
+        LOG.Debug("copy s3storage for bucket: %s, key: %s", self.bucket, location)
+
         if self.prefix:
             location = self.prefix + '/' + location
         self.s3.upload_fileobj(fileobj, self.bucket, location)
@@ -252,6 +267,8 @@ class S3Storage():
     @contextmanager
     def open(self, path, mode='rb'):
         """Open stored object."""
+        LOG.Debug("open s3storage for bucket: %s, path: %s", self.bucket, self.path)
+
         if self.prefix:
             path = self.prefix + '/' + path
         f = S3FileReader(self.s3, self.bucket, path, mode=mode)
@@ -260,6 +277,8 @@ class S3Storage():
 
     def exists(self, path):
         """Return true if the path exists."""
+        LOG.Debug("exists s3storage for bucket: %s, path: %s", self.bucket, self.path)
+
         if self.prefix:
             path = self.prefix + '/' + path
         return bool(self.filesize(path))
