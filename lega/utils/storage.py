@@ -249,7 +249,7 @@ class S3Storage():
 
     def filesize(self, path):
         """Return the size of the file pointed by ``path``."""
-        LOG.debug("filesize s3storage for bucket: %s, path: %s", self.bucket, self.path)
+        LOG.debug("filesize s3storage for bucket: %s, path: %s", self.bucket, path)
         resp = self.s3.head_object(Bucket=self.bucket, Key=path)
         return resp['ContentLength']
 
@@ -266,7 +266,7 @@ class S3Storage():
     @contextmanager
     def open(self, path, mode='rb'):
         """Open stored object."""
-        LOG.debug("open s3storage for bucket: %s, path: %s", self.bucket, self.path)
+        LOG.debug("open s3storage for bucket: %s, path: %s", self.bucket, path)
 
         if self.prefix:
             path = self.prefix + '/' + path
@@ -276,7 +276,7 @@ class S3Storage():
 
     def exists(self, path):
         """Return true if the path exists."""
-        LOG.debug("exists s3storage for bucket: %s, path: %s", self.bucket, self.path)
+        LOG.debug("exists s3storage for bucket: %s, path: %s", self.bucket, path)
 
         if self.prefix:
             path = self.prefix + '/' + path
