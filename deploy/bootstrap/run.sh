@@ -346,7 +346,7 @@ services:
     image: neicnordic/sda-inbox-sftp
     volumes:
       - inbox:/ega/inbox
-      - ./config/certs/htsget.p12:/ega/tls/inbox.p12
+      - ./config/certs/inbox.p12:/ega/tls/inbox.p12
       - ./config/certs/cacerts:/opt/openjdk-13/lib/security/cacerts
 EOF
 

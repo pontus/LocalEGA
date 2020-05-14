@@ -50,6 +50,10 @@ extensions = ['sphinx.ext.autodoc',
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['templates']
 
+linkcheck_ignore = [r'https://login.elixir-czech.org/oidc/.well-known/openid-configuration',
+                    r'https://test.api.tsd.usit.no/*']
+
+
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
@@ -65,9 +69,9 @@ master_doc = 'index'
 current_year = str(datetime.date.today().year)
 
 # General information about the project.
-project = 'Local EGA'
-copyright = f'2017 - {current_year}, NBIS System Developers'
-author = 'NBIS System Developers'
+project = 'NeIC SDA'
+copyright = f'2017 - {current_year}, NeiC System Developers'
+author = 'NeiC System Developers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -101,7 +105,7 @@ autosummary_generate = True
 
 # -- Options for HTML output ----------------------------------------------
 
-html_title = 'NBIS Local EGA'
+html_title = 'NeIC SDA'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -138,8 +142,8 @@ def setup(app):
 
 
 # -- Other stuff ----------------------------------------------------------
-htmlhelp_basename = 'LocalEGA'
+htmlhelp_basename = 'NeIC SDA'
 latex_elements = {}
-latex_documents = [(master_doc, 'LocalEGA.tex', 'Local EGA', 'NBIS System Developers', 'manual')]
-man_pages = [(master_doc, 'localega', 'Local EGA', [author], 1)]
-texinfo_documents = [(master_doc, 'LocalEGA', 'Local EGA', author, 'LocalEGA', 'Local extension to the European Genomic Archive', 'Miscellaneous')]
+latex_documents = [(master_doc, 'NeICSDA.tex', 'NeIC SDA', 'NeIC System Developers', 'manual')]
+man_pages = [(master_doc, 'sda', 'NeIC SDA', [author], 1)]
+texinfo_documents = [(master_doc, 'NeIC SDA', 'Local EGA', author, 'SDA', 'Local extension to the European Genomic Archive', 'Miscellaneous')]

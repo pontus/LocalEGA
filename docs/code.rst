@@ -1,31 +1,21 @@
---------------
-Python Modules
---------------
+
+LEGA Submission Code Components
+===============================
 
 .. automodule:: lega
    :members:
-   :synopsis: The lega package contains code to start a *Local EGA*.
+   :synopsis: The lega python package contains code to provide a *Local EGA* service.
 
 .. autosummary::
 
     lega.conf
     lega.utils
-    lega.notifications
     lega.ingest
     lega.verify
-    lega.keyserver
     lega.finalize
 
-*******************
-Inbox notifications
-*******************
-
-.. automodule:: lega.notifications
-
-
-****************
 Ingestion Worker
-****************
+----------------
 
 .. automodule:: lega.ingest
    :members:
@@ -34,16 +24,8 @@ Ingestion Worker
 .. automodule:: lega.finalize
    :members:
 
-
-*********
-Keyserver
-*********
-
-.. automodule:: lega.keyserver
-
-*****************
 Utility Functions
-*****************
+-----------------
 
 .. automodule:: lega.utils
 
@@ -54,10 +36,10 @@ Utility Functions
     lega.utils.checksum
     lega.utils.db
     lega.utils.storage
-    lega.utils.eureka
     lega.utils.exceptions
+    lega.utils.key
     lega.utils.logging
 
-
+.. include:: tests.rst
 
 :ref:`genindex` | :ref:`modindex`

@@ -1,95 +1,111 @@
-Throughout this documentation, we can refer to Central EGA as
-``CEGA``, or ``CentralEGA``, and *any* Local EGA instance as ``LEGA``,
-or ``LocalEGA``.  When two or more Local EGA instances are involved,
-we will use ``LEGA<i>`` for Local EGA instance ``<i>``.
+.. note:: Throughout this documentation, we can refer to `Central EGA <https://ega-archive.org/>`_ as
+         ``CEGA``, or ``CentralEGA``, and *any* Local EGA (also known as Federated EGA) instance as ``LEGA``,
+         or ``LocalEGA``.
+         In the context of NeIC we will refer to the LocalEGA as the
+         ``Sensitive Data Archive`` or ``SDA``.
 
-================
-Local EGA
-================
+===========================
+NeIC Sensitive Data Archive
+===========================
 
-The Local EGA project is divided into several microservices.
+NeIC Sensitive Data Archive is divided into several microservices as illustrated
+in the figure below.
+
+.. figure:: https://docs.google.com/drawings/d/e/2PACX-1vQ5EMrwMb8X7efk_luHlkB1l1TEpTwuh-B2_c0SAoqPb5nSulKmt2cJj6ptt8oFFBHs2LLt8FHMl5VP/pub?w=960&h=540
+   :width: 750
+   :align: center
+   :alt: General Architecture and Connected Components
+
+The components/microservices can be classified by use case:
+
+- submission - used in the process on submitting and ingesting data.
+- data retrieval - used for data retrieval/download.
 
 .. raw:: html
    :file: table.html
 
-The workflow consists of two ordered parts:
 
-The user first logs onto the Local EGA's inbox and uploads its
-files. He/She then goes to the Central EGA's interface to prepare a
-submission. Upon completion, the files are ingested into the archive and
-become searchable by the Central EGA's engine.
+The overall data workflow consists of three parts:
+
+- The users logs onto the Local EGA's inbox and uploads the
+  encrypted files. They then go to the Central EGA's interface to prepare a
+  submission;
+- Upon submission completion, the files are ingested into the archive and
+  become searchable by the Central EGA's engine;
+- Once the file has been successfully archived, it can be accessed by
+  researchers in accordance with permissions given by the
+  corresponding Data Access Committee.
 
 ----
 
-More concretely, Central EGA contains a database of users. The Central
-EGA' ID is used to authenticate the user against either their EGA
-password or an RSA key.
+Central EGA contains a database of users with permissions to upload to
+a specific Sensitive Data Archive. The Central EGA' ID is used to authenticate
+the user against either their EGA password or a private key.
 
 For every uploaded file, Central EGA receives a notification that the
-file has landed. The file is checksumed and presented in the Central
+file is present in a SDA's inbox.
+The uploaded file must be encrypted in the :download:`Crypt4GH file format
+<http://samtools.github.io/hts-specs/crypt4gh.pdf>` using that SDA public
+Crypt4gh key.
+The file is checksumed and presented in the Central
 EGA's interface in order for the user to double-check that it was
 properly uploaded.
 
-|moreabout| More details about the :ref:`inbox login system`.
+More details about process in :ref:`inboxlogin`.
 
 When a submission is ready, Central EGA triggers an ingestion process
-on the user-chosen Local EGA instance. The uploaded file must be
-encrypted in the :download:`Crypt4GH file format
-<./static/crypt4gh.pdf>` using that Local EGA's public PGP
-key. Central EGA's interface is updated with progress notifications
+on the user-chosen SDA instance. Central EGA's interface is updated with progress notifications
 whether the ingestion was successful, or whether there was an error.
 
-|moreabout| More details about the :ref:`ingestion process`.
+More details about the :ref:`ingestion process`.
 
-.. image:: /static/components.svg
-   :target: ./_static/components.svg
-   :alt: General Architecture and Connected Components
+Once a file has been successfully submitted and the ingestion process has been finalised,
+including receiving an `Accession ID` from Central EGA. The Data Out API can be
+utilised to retrieve set file by utilising the `Accession ID`. More details in :ref:`data out`.
 
 ----
 
 Getting started
-===============
+---------------
 
 .. toctree::
    :maxdepth: 2
    :name: setup
 
-   Getting started      <setup>
-   Bootstrap & Deploy   <bootstrap>
+   Getting started                   <setup>
+   Database Setup                    <db>
+   Deployments and Local Bootstrap   <deploy>
 
 Information about the Architecture
-==================================
+----------------------------------
 
 .. toctree::
    :maxdepth: 2
    :name: architecture
 
-   Inbox                <inbox>
-   Ingestion            <ingestion>
-   Encryption           <encryption>
-   Keyserver            <keyserver>
-   Database             <db>
-   CEGA from/to LEGA    <connection>
+   Encryption                <encryption>
+   Data Submission           <submission>
+   Interfacing with CEGA     <connection>
+   Data Retrieval API        <dataout>
 
 Miscellaneous
-=============
+-------------
 
 .. toctree::
    :maxdepth: 1
    :name: extra
 
-   Python Modules       <code>
-   Testsuite            <tests>
-   Contributing         <CONTRIBUTING>
+   LEGA Submission Code Components     <code>
+   Contributing              <https://github.com/neicnordic/LocalEGA/blob/master/CONTRIBUTING.md>
 
-|Codacy| | |Travis| | Version |version| | Generated |today|
+|Coveralls| | |Github Actions| | Version |version| | Generated |today|
 
 
-.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/3dd83b28ec2041889bfb13641da76c5b
-	:alt: Codacy Badge
+.. |Coveralls| image:: https://coveralls.io/repos/github/neicnordic/LocalEGA/badge.svg?branch=HEAD
+	:alt: Coveralls Badge
 	:class: inline-baseline
 
-.. |Travis| image:: https://travis-ci.org/NBISweden/LocalEGA.svg?branch=dev
+.. |Github Actions| image:: https://github.com/neicnordic/LocalEGA/workflows/Integration%20Tests/badge.svg
 	:alt: Build Status
 	:class: inline-baseline
 

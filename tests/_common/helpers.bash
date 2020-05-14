@@ -176,7 +176,7 @@ function lega_trigger_ingestion {
     [ "$status" -eq 0 ]
 
     # Check that a message with the above correlation id arrived in the expected queue
-    # Waiting attemps * delay seconds.
+    # Waiting attempts * delay seconds.
     retry_until 0 $attempts $delay ${MQ_FIND} $queue "${CORRELATION_ID}"
     [ "$status" -eq 0 ]
 
@@ -217,7 +217,7 @@ function lega_trigger_stabled_id {
     [ "$status" -eq 0 ]
 
     # Check that a message with the above correlation id arrived in the expected queue
-    # Waiting attemps * delay seconds.
+    # Waiting attempts * delay seconds.
     output=$(PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select stable_id from local_ega.files where inbox_file_checksum = 'somechecksum' limit 1;")
     [[ "$output" =~ "EGAF001" ]]
 }
