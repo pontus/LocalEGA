@@ -55,7 +55,8 @@ At this stage, the associated decryption key is retrieved.
 If decryption completes and the checksum is valid, a message of completion
 is sent to Central EGA: Ingestion completed.
 
-.. important:: If a file has been submitted twice one of them would be invalidated.
+.. important::  If a file disappears or is overwritten in the inbox before ingestion 
+￼               is completed, ingestion may not be possible.
 
 If any of the above steps generates an error, we exit the workflow and
 log the error. In case the error is related to a misuse from the user,
