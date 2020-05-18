@@ -33,7 +33,7 @@ Users are handled through Central EGA, directly.
           'aiohttp',
           'psycopg2>=2.8.4',
           'PyYaml',
-          'boto3',
+          'boto3>=1.13.10',
           'requests',
           'crypt4gh @ git+https://github.com/EGA-archive/crypt4gh.git@v1.1',
           'tox'
