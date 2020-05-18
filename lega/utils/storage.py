@@ -240,7 +240,11 @@ class S3Storage():
 
     def copy(self, fileobj, location):
         """Copy file object in a bucket."""
-        self.s3.upload_fileobj(fileobj, self.bucket, location)
+        from boto3.s3.transfer import TransferConfig
+        chunksize = int(CONF.get_value('archive', 's3_chunk_size', default=32 * 1024 * 1024))
+        transfer_config = TransferConfig(multipart_threshold=chunksize, max_concurrency=10,
+                                         multipart_chunksize=chunksize, use_threads=True)
+        self.s3.upload_fileobj(fileobj, self.bucket, location, Config=transfer_config)
         resp = self.s3.head_object(Bucket=self.bucket, Key=location)
         return resp['ContentLength']
 
