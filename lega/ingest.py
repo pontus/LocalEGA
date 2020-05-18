@@ -11,7 +11,7 @@ It is possible to start several workers.
 When a message is consumed, it must at least contain the following fields:
 
 * ``filepath``
-* ``user_id``
+* ``user``
 
 Upon completion, a message is sent to the local exchange with the
 routing key :``archived``.
@@ -26,7 +26,7 @@ import hashlib
 from crypt4gh import header
 
 from .conf import CONF
-from .utils import db, exceptions, errors, sanitize_user_id, storage
+from .utils import db, exceptions, errors, storage
 from .utils.amqp import consume
 
 LOG = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def work(fs, inbox_fs, data):
     LOG.info('Processing %s', filepath)
 
     # Remove the host part of the user name
-    user_id = sanitize_user_id(data['user'])
+    user = data['user']
 
     # Keeping data as-is (cuz the decorator is using it)
     # It will be augmented, but we keep the original data first
@@ -59,7 +59,7 @@ def work(fs, inbox_fs, data):
     data['org_msg'] = org_msg
 
     # Insert in database
-    file_id = db.insert_file(filepath, user_id)
+    file_id = db.insert_file(filepath, user)
 
     data['file_id'] = file_id  # must be there: database error uses it
 
@@ -70,7 +70,7 @@ def work(fs, inbox_fs, data):
         file_checksum = [item for item in data['encrypted_checksums'] if item.get('type') == 'sha256']
 
     # Instantiate the inbox backend
-    inbox = inbox_fs(user_id)
+    inbox = inbox_fs(user)
     LOG.info("Inbox backend: %s", str(inbox))
 
     # Check if file is in inbox

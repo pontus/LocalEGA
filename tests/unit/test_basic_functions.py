@@ -4,7 +4,7 @@ from lega.conf.__main__ import main
 import hashlib
 import unittest
 from unittest import mock
-from lega.utils import get_file_content, sanitize_user_id
+from lega.utils import get_file_content
 import io
 from testfixtures import tempdir
 from . import c4gh_data
@@ -78,12 +78,6 @@ class TestBasicFunctions(unittest.TestCase):
     def test_get_file_fail(self):
         """Reading file error, file should not exist."""
         assert get_file_content('data/notexists.file') is None
-
-    def test_sanitize_user_id(self):
-        """Sanitize User ID, should get just the user ID."""
-        # A good test would be to see if it actually ends in @elixir-europe.org
-        # because currently the function does not
-        assert sanitize_user_id('user_1245@elixir-europe.org') == 'user_1245'
 
     def test_supported_algorithms(self):
         """Should get a tuple of supported algorithms."""
