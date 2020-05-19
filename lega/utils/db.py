@@ -178,6 +178,14 @@ def get_info(file_id):
         return cur.fetchone()
 
 
+def get_header(file_id):
+    """Retrieve information for ``file_id``."""
+    with connection.cursor() as cur:
+        query = 'SELECT header from local_ega.files WHERE id = %(file_id)s;'
+        cur.execute(query, {'file_id': file_id})
+        return cur.fetchone()
+
+
 def mark_in_progress(file_id):
     """Mark file in progress."""
     LOG.debug('Marking file_id %s with "IN_INGESTION"', file_id)
