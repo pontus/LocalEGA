@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Consumes message to update the database with stable IDs to file IDS mappings.
+"""
+Consumes messages to update the database with stable IDs to file IDS mappings.
 
-Instead of building a REST endpoint in front of the database, we
-exchange messages between the brokers.
+Messages can be delivered to a local broker by registering an upstream queue.
 
-Messages will be reliably arrived to the local broker, via the
-registered upstream queue.
-
-.. note:: The upstream is registered via an authenticated mechanism, and uses AMQPS.
 """
 
 import sys
@@ -24,7 +20,14 @@ LOG = logging.getLogger(__name__)
 
 @errors.catch(ret_on_error=(None, True))
 def work(data):
-    """Read a message containing the ids and add it to the database."""
+    """
+    Read a message containing the ids and add it to the database.
+
+    :param data: a dictionary containing the stable id, user, file checksum and file path
+    :type data: dict
+    :return: A tuple indicating the stable id has been mapped. 
+    :rtype: tuple
+    """    
     filepath = data['filepath']
     user = data['user']
     encrypted_checksum = data['file_checksum']
@@ -41,7 +44,12 @@ def work(data):
 
 
 def main(args=None):
-    """Listen for incoming stable IDs."""
+    """
+    Consume incoming stable IDs from the local broker.
+
+    :param args: Service configuration arguments, defaults to None
+    :type args: list, optional
+    """    
     if not args:
         args = sys.argv[1:]
 
