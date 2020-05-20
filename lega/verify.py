@@ -95,7 +95,7 @@ def work(key, mover, data):
     LOG.info('Verification | message: %s', data)
 
     file_id = data['file_id']
-    header = bytes.fromhex(data['header'])
+    header = bytes.fromhex(db.get_header(file_id)[0])
     archive_path = data['archive_path']
     LOG.info('Opening archive file: %s', archive_path)
     # If you can decrypt... the checksum is valid

@@ -102,7 +102,6 @@ def work(fs, inbox_fs, data):
         # now start splitting the header from the rest of the file
         header_bytes = get_header(infile)
         header_hex = header_bytes.hex()
-        data['header'] = header_hex
         db.store_header(file_id, header_hex)  # header bytes will be .hex()
 
         target = fs.location(file_id)

@@ -42,7 +42,6 @@ class testIngest(unittest.TestCase):
                    'file_checksum': "efa8ce457b27728b7af3351ed77793a6421190877128451830d68babbacf3021",
                    'org_msg': {'filepath': infile, 'user': 'user_id@elixir-europe.org',
                                "encrypted_checksums": [{"type": "sha256", "value": "efa8ce457b27728b7af3351ed77793a6421190877128451830d68babbacf3021"}]},
-                   'header': '686561646572',
                    'archive_path': 'smth'}, False)
         self.assertEqual(mocked, result)
         filedir.cleanup()
@@ -67,7 +66,6 @@ class testIngest(unittest.TestCase):
                    'file_id': 32,
                    'file_checksum': "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                    'org_msg': {'filepath': infile, 'user': 'user_id@elixir-europe.org'},
-                   'header': '686561646572',
                    'archive_path': 'smth'}, False)
         self.assertEqual(mocked, result)
         filedir.cleanup()
