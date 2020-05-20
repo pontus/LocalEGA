@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""This module reads a message from the ``archived`` queue, and attempts to decrypt the file.
+"""
+This module reads a message from the ``archived`` queue, and attempts to decrypt the file.
 
 The decryption includes a checksum step.
 It the checksum is valid, we consider that the archive has a properly
@@ -30,7 +31,20 @@ LOG = logging.getLogger(__name__)
 
 @errors.catch(ret_on_error=(None, True))
 def work(key, mover, data):
-    """Verify that the file in the archive can be properly decrypted."""
+    """
+    Verify that the file in the archive can be properly decrypted.
+
+    :param key: Key used for decryption
+    :type key: C4GHFileKey
+    :param mover: An instance of a file or S3 storage handler
+    :type mover: FileStorage or S3Storage
+    :param data: A dictionary containing the user, file path, file checksum and encrypted checksum
+    :type data: dict
+    :raises exceptions.SessionKeyDecryptionError: Decryption could not be performed
+    :raises exceptions.SessionKeyAlreadyUsedError: Session key was already used
+    :return: tuple containing reply message
+    :rtype: tuple
+    """    
     LOG.info('Verification | message: %s', data)
 
     file_id = data['file_id']
@@ -57,10 +71,14 @@ def work(key, mover, data):
     md_md5 = hashlib.md5()  # we also calculate the md5 for the stable ID attribution (useless: Make EBI drop md5).
 
     def process_output():
+        """
+        Add data to the current checksum process.
+        """        
         while True:
             data = yield
             md_md5.update(data)
             md_sha256.update(data)
+
     output = process_output()
     next(output)  # start it
 
@@ -99,7 +117,12 @@ def work(key, mover, data):
 
 
 def main(args=None):
-    """Run verify service."""
+    """
+    Run verify service which waits for messages from the queue archived.
+
+    :param args: Service configuration arguments, defaults to None
+    :type args: list, optional
+    """    
     if not args:
         args = sys.argv[1:]
 
