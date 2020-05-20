@@ -275,3 +275,16 @@ function query_db {
 
     PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select $what from $table $whereclause;"
 }
+
+function wait_db {
+    # Try asking the database until we can connect properly.
+
+    while true; do
+        if PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "" 2>&1 | grep ^psql:; then
+	    sleep 1
+	else
+	    break
+	fi
+    done
+    true
+}
