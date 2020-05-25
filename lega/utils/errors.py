@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Capture Errors as a decorator and logs them in the database."""
+"""
+Capture Errors as a decorator and logs them in the database.
+"""
 
 import sys
 import logging
@@ -18,7 +20,9 @@ LOG = logging.getLogger(__name__)
 
 
 def log_trace():
-    """Locate the error."""
+    """
+    Locate the error.
+    """
     exc_type, _, exc_tb = sys.exc_info()
     # traceback.print_tb(exc_tb)
     g = traceback.walk_tb(exc_tb)
@@ -34,9 +38,17 @@ def log_trace():
 
 
 def handle_error(e, data):
-    """Log error in the database.
+    """
+    Log error in the database.
 
-    If error is from user send to CEGA.
+    If error is from user a message is sent to CEGA.
+
+    :param e: Error object
+    :type e: object
+    :param data: A dictionary containing file ingestion metadata
+    :type data: dict
+    :raises in: In case of AssertionError
+    :raises e: An exception not caused by the user is raised
     """
     # Re-raise in case of AssertionError
     if isinstance(e, AssertionError):
@@ -66,7 +78,12 @@ def handle_error(e, data):
 
 
 def catch(ret_on_error=None):
-    """Return decorator to store the raised exception in the database."""
+    """
+    Return decorator to store the raised exception in the database.
+
+    :param ret_on_error: An object to return in case of error, defaults to None
+    :type ret_on_error: object, optional
+    """
     def catch_error(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
