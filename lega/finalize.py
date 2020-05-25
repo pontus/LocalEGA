@@ -25,9 +25,9 @@ def work(data):
 
     :param data: a dictionary containing the stable id, user, file checksum and file path
     :type data: dict
-    :return: A tuple indicating the stable id has been mapped. 
+    :return: A tuple indicating the stable id has been mapped.
     :rtype: tuple
-    """    
+    """
     filepath = data['filepath']
     user = data['user']
     encrypted_checksum = data['file_checksum']
@@ -49,7 +49,7 @@ def main(args=None):
 
     :param args: Service configuration arguments, defaults to None
     :type args: list, optional
-    """    
+    """
     if not args:
         args = sys.argv[1:]
 

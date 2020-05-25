@@ -36,7 +36,7 @@ def work(key, mover, data):
 
     :param key: Key used for decryption
     :type key: C4GHFileKey
-    :param mover: An instance of a file or S3 storage handler
+    :param mover: An instance of a POSIX or S3 storage handler
     :type mover: FileStorage or S3Storage
     :param data: A dictionary containing the user, file path, file checksum and encrypted checksum
     :type data: dict
@@ -44,7 +44,7 @@ def work(key, mover, data):
     :raises exceptions.SessionKeyAlreadyUsedError: Session key was already used
     :return: tuple containing reply message
     :rtype: tuple
-    """    
+    """
     LOG.info('Verification | message: %s', data)
 
     file_id = data['file_id']
@@ -73,7 +73,7 @@ def work(key, mover, data):
     def process_output():
         """
         Add data to the current checksum process.
-        """        
+        """
         while True:
             data = yield
             md_md5.update(data)
@@ -118,11 +118,11 @@ def work(key, mover, data):
 
 def main(args=None):
     """
-    Run verify service which waits for messages from the queue archived.
+    Run verify service, which waits for messages from the queue archived.
 
     :param args: Service configuration arguments, defaults to None
     :type args: list, optional
-    """    
+    """
     if not args:
         args = sys.argv[1:]
 

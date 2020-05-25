@@ -146,7 +146,7 @@ class AMQPConnection():
         Retrieve connection channel.
 
         :yield: A blocking connection channel
-        :rtype: BlockingChannel
+        :rtype: pika.adapters.blocking_connection.BlockingChannel
         """
         if self.conn is None:
             self.connect()
@@ -220,7 +220,7 @@ def consume(work, from_queue, to_routing, ack_on_error=True):
         Process an AMQP request.
 
         :param channel: Blocking channel used to send the ACK
-        :type channel: BlockingChannel
+        :type channel: pika.adapters.blocking_connection.BlockingChannel
         :param method_frame: Carries with it the request or response that's being sent to or received
         :type method_frame: pika.Frame.Method
         :param props: Properties of remote procedure call used to get the correlation id
