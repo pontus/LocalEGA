@@ -5,9 +5,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Key():
-    """
-    Base class holding the information about a keypair.
-    """
+    """Base class holding the information about a keypair."""
 
     def __init__(self, config):
         """
@@ -86,16 +84,12 @@ class C4GHFileKey(Key):
 
 
 class HashiCorpVaultKey(Key):
-    """
-    Retrieve a key from a remote Hashicorp Vault.
-    """
+    """Retrieve a key from a remote Hashicorp Vault."""
 
     pass
 
 
 class HTTPSKey(Key):
-    """
-    Retrieve a key from a remote HTTP(s) server.
-    """
+    """Retrieve a key from a remote HTTP(s) server."""
 
     pass

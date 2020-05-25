@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Module for handling custom LEGA exceptions.
-"""
+"""Module for handling custom LEGA exceptions."""
 
 #############################################################################
 # User Errors
@@ -9,9 +7,7 @@ Module for handling custom LEGA exceptions.
 
 
 class FromUser(Exception):
-    """
-    Raised Exception on incorrect user input.
-    """
+    """Raised Exception on incorrect user input."""
 
     def __str__(self):  # Informal description
         """
@@ -24,7 +20,7 @@ class FromUser(Exception):
 
     def __repr__(self):  # Technical description
         """
-        Return detailed, technical description
+        Return detailed, technical description.
 
         :return: A more detailed message showing that the user input was not correct.
         :rtype: str
@@ -50,7 +46,7 @@ class NotFoundInInbox(FromUser):
 
     def __str__(self):
         """
-        An informal exception description.
+        Return an informal exception description.
 
         :return: A readable informal exception description
         :rtype: str
@@ -59,7 +55,7 @@ class NotFoundInInbox(FromUser):
 
     def __repr__(self):
         """
-        Return the file name for the missing file
+        Return the file name for the missing file.
 
         :return: A file name
         :rtype: str
@@ -149,7 +145,7 @@ class Checksum(FromUser):
 
     def __repr__(self):
         """
-        Return readable informal exception description about checksumed exception, with file name
+        Return readable informal exception description about checksumed exception, with file name.
 
         :return: Exception about checksum with file name
         :rtype: str

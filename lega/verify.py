@@ -71,9 +71,7 @@ def work(key, mover, data):
     md_md5 = hashlib.md5()  # we also calculate the md5 for the stable ID attribution (useless: Make EBI drop md5).
 
     def process_output():
-        """
-        Add data to the current checksum process.
-        """
+        """Add data to the current checksum process."""
         while True:
             data = yield
             md_md5.update(data)

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-File I/O for disk or S3 Object storage.
-"""
+"""File I/O for disk or S3 Object storage."""
 
 import os
 import io
@@ -17,9 +15,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FileStorage():
-    """
-    Storage on disk and related I/O.
-    """
+    """Storage on disk and related I/O."""
 
     def __init__(self, config_section, user):
         """
@@ -216,17 +212,13 @@ class S3FileReader(object):
         return out
 
     def close(self):
-        """
-        Close object reader.
-        """
+        """Close object reader."""
         if self.closed:
             return
         self.closed = True
 
     def __del__(self):
-        """
-        Prepare for object destruction.
-        """
+        """Prepare for object destruction."""
         self.close()
 
     def __str__(self):
@@ -241,15 +233,11 @@ class S3FileReader(object):
     __repr__ = __str__
 
     def __enter__(self):
-        """
-        Set things.
-        """
+        """Set things."""
         return self
 
     def __exit__(self, *args):
-        """
-        Prepare for object destruction.
-        """
+        """Prepare for object destruction."""
         self.close()
 
     # Implementations of BufferedIOBase stub methods
@@ -337,9 +325,7 @@ class S3FileReader(object):
 
 
 class S3Storage():
-    """
-    S3 object storage and related I/O.
-    """
+    """S3 object storage and related I/O."""
 
     def __init__(self, config_section, bucket, prefix=""):
         """

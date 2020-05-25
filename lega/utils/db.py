@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Database operations handling module.
-"""
+"""Database operations handling module."""
 
 import sys
 import logging
@@ -22,9 +20,7 @@ LOG = logging.getLogger(__name__)
 ######################################
 
 class DBConnection():
-    """
-    Databse connection setup.
-    """
+    """Databse connection setup."""
 
     conn = None
     curr = None
@@ -45,9 +41,7 @@ class DBConnection():
         self.conf_section = conf_section or 'db'
 
     def fetch_args(self):
-        """
-        Fetch arguments for initializing a connection to db.
-        """
+        """Fetch arguments for initializing a connection to db."""
         self.args = CONF.get_value(self.conf_section, 'connection')
         self.interval = CONF.get_value(self.conf_section, 'try_interval', conv=int, default=1)
         self.attempts = CONF.get_value(self.conf_section, 'try', conv=int, default=1)
@@ -101,9 +95,7 @@ class DBConnection():
             self.on_failure()
 
     def ping(self):
-        """
-        Ping DB connection.
-        """
+        """Ping DB connection."""
         if self.conn is None:
             self.connect()
         try:
@@ -131,9 +123,7 @@ class DBConnection():
             # transaction autocommit, but connection not closed
 
     def close(self):
-        """
-        Close DB Connection.
-        """
+        """Close DB Connection."""
         LOG.debug("Closing the database")
         if self.curr:
             self.curr.close()

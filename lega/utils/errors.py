@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Capture Errors as a decorator and logs them in the database.
-"""
+"""Capture Errors as a decorator and logs them in the database."""
 
 import sys
 import logging
@@ -20,9 +18,7 @@ LOG = logging.getLogger(__name__)
 
 
 def log_trace():
-    """
-    Locate the error.
-    """
+    """Locate the error."""
     exc_type, _, exc_tb = sys.exc_info()
     # traceback.print_tb(exc_tb)
     g = traceback.walk_tb(exc_tb)

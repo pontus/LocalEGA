@@ -29,7 +29,7 @@ class LEGAHandler(handler):
 
     def makePickle(self, record):
         """
-        Create python pickle
+        Create python pickle.
 
         :param record: A log record
         :type record: str
@@ -50,9 +50,7 @@ class JSONFormatter(Formatter):
     """
 
     def __init__(self, *args, **kwargs):
-        """
-        Initialize formatter.
-        """
+        """Initialize formatter."""
         Formatter.__init__(self, *args, **kwargs)
         standard_formatters = re.compile(r'\((.+?)\)', re.IGNORECASE)
         self._fields = standard_formatters.findall(self._fmt)
@@ -93,6 +91,7 @@ class _wrapper():
     :return: Correnlation id value
     :rtype: object
     """
+
     value = None
 
     def get(self):

@@ -15,9 +15,7 @@ LOG = logging.getLogger(__name__)
 
 
 class AMQPConnection():
-    """
-    Establishment of AMQP connections.
-    """
+    """Establishment of AMQP connections."""
 
     conn = None
     chann = None
@@ -39,9 +37,7 @@ class AMQPConnection():
         # assert self.conf_section in CONF.sections(), "Section not found in config file"
 
     def fetch_args(self):
-        """
-        Retrieve AMQP connection parameters.
-        """
+        """Retrieve AMQP connection parameters."""
         LOG.info('Getting a connection to %s', self.conf_section)
 
         use_ssl = CONF.get_value(self.conf_section, 'ssl', default="no", conv=bool)
@@ -153,9 +149,7 @@ class AMQPConnection():
         yield self.chann
 
     def close(self):
-        """
-        Close MQ channel.
-        """
+        """Close MQ channel."""
         LOG.debug("Closing the AMQP connection.")
         if self.chann and not self.chann.is_closed:
             self.chann.close()
