@@ -180,7 +180,7 @@ class SessionKeyDecryptionError(FromUser):
 
     def __repr__(self):
         """
-        Return readable technical exception description
+        Return readable technical exception description.
 
         :return: Exception about header decryption with header
         :rtype: str

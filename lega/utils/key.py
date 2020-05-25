@@ -28,7 +28,7 @@ class Key():
 
     def private(self):
         """
-        Get the private key part
+        Get the private key part.
 
         :raises NotImplementedError: It should return bytes
         """
@@ -68,7 +68,7 @@ class C4GHFileKey(Key):
 
     def public(self):
         """
-        Get the public key part
+        Get the public key part.
 
         :return: It returns 32 bytes
         :rtype: bytes
