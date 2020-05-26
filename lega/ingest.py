@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Worker reading messages from the ``files`` queue, splitting the Crypt4GH header from the remainder of the file.
+"""
+Worker reading messages from the ``files`` queue, splitting the Crypt4GH header from the remainder of the file.
 
 The header is stored in the database and the remainder is sent to the backend storage:
 either a regular file system or an S3 object store.
@@ -33,7 +34,14 @@ LOG = logging.getLogger(__name__)
 
 
 def get_header(input_file):
-    """Extract the header bytes, and leave the ``input_file`` file handle at the beginning of the data portion."""
+    """
+    Get the header bytes, and leave the ``input_file`` file handle at the beginning of the data portion.
+
+    :param input_file: A file in order to extract the header
+    :type input_file: file
+    :return: The bytes containing the header
+    :rtype: bytes
+    """
     _ = list(header.parse(input_file))
     pos = input_file.tell()
     input_file.seek(0, io.SEEK_SET)  # rewind
@@ -46,7 +54,19 @@ def get_header(input_file):
 
 @errors.catch(ret_on_error=(None, True))
 def work(fs, inbox_fs, data):
-    """Read a message, split the header and send the remainder to the backend store."""
+    """
+    Read a message, split the header and send the remainder to the backend store.
+
+    :param fs: An instance of a POSIX or a S3 storage handler for ingesting files
+    :type fs: FileStorage or S3Storage
+    :param inbox_fs: An instance of a POSIX or a S3 storage handler for the inbox
+    :type inbox_fs: FileStorage or S3Storage
+    :param data: A dictionary containing the user, file path and encrypted checksums
+    :type data: dict
+    :raises exceptions.NotFoundInInbox: The file could not be located in the inbox
+    :return: A tuple containg the reply message from the ingestion process
+    :rtype: tuple
+    """
     filepath = data['filepath']
     LOG.info('Processing %s', filepath)
 
@@ -134,7 +154,12 @@ def work(fs, inbox_fs, data):
 
 
 def setup_archive():
-    """Configure the archive backend."""
+    """
+    Configure the archive backend.
+
+    :return: An instance of a POSIX or a S3 storage handler for ingesting files
+    :rtype: FileStorage or S3Storage
+    """
     archive_fs = getattr(storage, CONF.get_value('archive', 'storage_driver', default='FileStorage'))
     fs_path = None
     if archive_fs is storage.FileStorage:
@@ -146,7 +171,12 @@ def setup_archive():
 
 
 def setup_inbox():
-    """Configure the inbox backend."""
+    """
+    Configure the inbox backend.
+
+    :return: An instance of a POSIX or a S3 storage handler for the inbox
+    :rtype: FileStorage or S3Storage
+    """
     inbox_fs = getattr(storage, CONF.get_value('inbox', 'storage_driver', default='FileStorage'))
 
     inbox = None
@@ -159,7 +189,12 @@ def setup_inbox():
 
 
 def main(args=None):
-    """Run ingest service."""
+    """
+    Run ingest service, which waits for messages from the queue files.
+
+    :param args: Service configuration arguments, defaults to None
+    :type args: list, optional
+    """
     if not args:
         args = sys.argv[1:]
 

@@ -8,7 +8,8 @@ import re
 
 
 class LEGAHandler(handler):
-    """Formats the record according to the formatter.
+    """
+    Formats the record according to the formatter.
 
     A new line is sent to support Logstash input plugin.
     """
@@ -16,13 +17,25 @@ class LEGAHandler(handler):
     terminator = b'\n'
 
     def send(self, s):
-        """Register SocketHandler ``send`` plus the class terminator (newline)."""
+        """
+        Register SocketHandler ``send`` plus the class terminator (newline).
+
+        :param s: A byte-string packet
+        :type s: byte-string
+        """
         super().send(s)
         if self.sock is not None:
             self.sock.sendall(self.terminator)
 
     def makePickle(self, record):
-        """Create python pickle."""
+        """
+        Create python pickle.
+
+        :param record: A log record
+        :type record: str
+        :return: A utf-8 encoded log record
+        :rtype: bytes
+        """
         # pickle.dumps creates problem for logstash
         # to parse a JSON formatted string.
         # Especially when the bytes length is prepended.
@@ -30,7 +43,8 @@ class LEGAHandler(handler):
 
 
 class JSONFormatter(Formatter):
-    """Json Logs formatting.
+    """
+    Json Logs formatting.
 
     Mainly used for ELK stack.
     """
@@ -42,7 +56,14 @@ class JSONFormatter(Formatter):
         self._fields = standard_formatters.findall(self._fmt)
 
     def format(self, record):
-        """Format a log record and serializes to json."""
+        """
+        Format a log record and serializes to json.
+
+        :param record: A log record
+        :type record: LogRecord
+        :return: JSON formatted log record
+        :rtype: str
+        """
         log_record = {}
 
         for field in self._fields:
@@ -64,7 +85,12 @@ class JSONFormatter(Formatter):
 
 
 class _wrapper():
-    """Wrapper class for the correlation id."""
+    """
+    Wrapper class for the correlation id.
+
+    :return: Correnlation id value
+    :rtype: object
+    """
 
     value = None
 
@@ -79,7 +105,8 @@ _cid = _wrapper()
 
 
 class LEGALogger(Logger):
-    """Logger with a correlation id injected in the log records.
+    """
+    Logger with a correlation id injected in the log records.
 
     If the correlation id is specified in the ``extra`` dictionary, we
     inject its value. If not, we try to find it in the local variables
@@ -89,7 +116,12 @@ class LEGALogger(Logger):
     """
 
     def makeRecord(self, *args, **kwargs):
-        """Specialized record with correlation_id."""
+        """
+        Specialized record with correlation_id.
+
+        :return: A custom LEGA log record instance
+        :rtype: LogRecord
+        """
         rv = super(LEGALogger, self).makeRecord(*args, **kwargs)
 
         # Adding correlation_id if not already there

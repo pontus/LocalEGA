@@ -15,14 +15,21 @@ LOG = logging.getLogger(__name__)
 
 
 class AMQPConnection():
-    """Initiate AMQP Connection."""
+    """Establishment of AMQP connections."""
 
     conn = None
     chann = None
     connection_params = None
 
     def __init__(self, conf_section='broker', on_failure=None):
-        """Initialize AMQP class."""
+        """
+        Initialize AMQP class.
+
+        :param conf_section: Section in the configuration file, defaults to 'broker'
+        :type conf_section: str, optional
+        :param on_failure: A callable object to be called in case of failure, defaults to None
+        :type on_failure: callable object, optional
+        """
         self.on_failure = on_failure
         self.conf_section = conf_section or 'broker'
         print('Conf section', self.conf_section)
@@ -96,7 +103,12 @@ class AMQPConnection():
             self.connection_params.ssl_options = pika.SSLOptions(context=context, server_hostname=hostname)
 
     def connect(self, force=False):
-        """Make a blocking/select connection to the Message Broker supporting AMQP(S)."""
+        """
+        Make a blocking/select connection to the Message Broker supporting AMQP(S).
+
+        :param force: Whether to force a new connection or not, defaults to False
+        :type force: bool, optional
+        """
         if force:
             self.close()
 
@@ -126,7 +138,12 @@ class AMQPConnection():
 
     @contextmanager
     def channel(self):
-        """Retrieve connection channel."""
+        """
+        Retrieve connection channel.
+
+        :yield: A blocking connection channel
+        :rtype: pika.adapters.blocking_connection.BlockingChannel
+        """
         if self.conn is None:
             self.connect()
         yield self.chann
@@ -147,7 +164,18 @@ connection = AMQPConnection(on_failure=lambda: sys.exit(1))
 
 
 def publish(message, exchange, routing, correlation_id=None):
-    """Send a message to the local broker exchange using the given routing key."""
+    """
+    Send a message to the local broker exchange using the given routing key.
+
+    :param message: A dictionary representing the message to be published
+    :type message: dict
+    :param exchange: Exchange to publish to
+    :type exchange: str
+    :param routing: Routing key for the messages
+    :type routing: str
+    :param correlation_id: Id used to correlate responses with requests, defaults to None
+    :type correlation_id: str, optional
+    """
     correlation_id = correlation_id or _cid.get()
     assert(correlation_id), "You should not publish without a correlation id"
     with connection.channel() as channel:
@@ -161,17 +189,40 @@ def publish(message, exchange, routing, correlation_id=None):
 
 
 def consume(work, from_queue, to_routing, ack_on_error=True):
-    """Register callback ``work`` to be called, blocking function.
+    """
+    Register callback ``work`` to be called, blocking function.
 
     If there are no message in ``from_queue``, the function blocks and waits for new messages.
 
     If the function ``work`` returns a non-None message, the latter is published
-    to the `lega` exchange with ``to_routing`` as the routing key.
+    to the `lega` exchange with ``to_routing`` as the routing key
+
+    :param work: A callable object to register as callback
+    :type work: callable object
+    :param from_queue: Queue to consume messages from
+    :type from_queue: str
+    :param to_routing: Routing key for the local exchange messages
+    :type to_routing: str
+    :param ack_on_error: Send ACK in case of error, defaults to True
+    :type ack_on_error: bool, optional
     """
     LOG.debug('Consuming message from %s', from_queue)
     assert(from_queue)
 
     def process_request(channel, method_frame, props, body):
+        """
+        Process an AMQP request.
+
+        :param channel: Blocking channel used to send the ACK
+        :type channel: pika.adapters.blocking_connection.BlockingChannel
+        :param method_frame: Carries with it the request or response that's being sent to or received
+        :type method_frame: pika.Frame.Method
+        :param props: Properties of remote procedure call used to get the correlation id
+        :type props: pika.spec.BasicProperties
+        :param body: Body of the consumed message
+        :type body: str
+        :return: To end the execution of the function call
+        """
         correlation_id = props.correlation_id
         message_id = method_frame.delivery_tag
         try:

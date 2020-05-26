@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Database Connection."""
+"""Database operations handling module."""
 
 import sys
 import logging
@@ -29,7 +29,14 @@ class DBConnection():
     attempts = None
 
     def __init__(self, conf_section='db', on_failure=None):
-        """Initialize config section parameters for DB and failure fallback."""
+        """
+        Initialize config section parameters for DB and failure fallback.
+
+        :param conf_section: Section in the configuration file, defaults to 'db'
+        :type conf_section: str, optional
+        :param on_failure: A callable object to be called in case of failure, defaults to None
+        :type on_failure: callable object, optional
+        """
         self.on_failure = on_failure
         self.conf_section = conf_section or 'db'
 
@@ -41,12 +48,16 @@ class DBConnection():
         assert self.attempts > 0, "The number of reconnection should be >= 1"
 
     def connect(self, force=False):
-        """Get the database connection (which encapsulates a database session).
+        """
+        Get the database connection (which encapsulates a database session).
 
         Upon success, the connection is cached.
 
         Before success, we try to connect ``try`` times every ``try_interval`` seconds (defined in CONF)
         Executes ``on_failure`` after ``try`` attempts.
+
+        :param force: Whether to force a new connection or not, defaults to False
+        :type force: bool, optional
         """
         if force:
             self.close()
@@ -98,7 +109,12 @@ class DBConnection():
 
     @contextmanager
     def cursor(self):
-        """Return DB Cursor, thus reusing it."""
+        """
+        Return DB Cursor, thus reusing it.
+
+        :yield: A cursor to execute PostgreSQL commands in a database session
+        :rtype: psycopg2.extensions.cursor
+        """
         self.ping()
         with self.conn:
             with self.conn.cursor() as cur:
@@ -130,7 +146,17 @@ connection = DBConnection(on_failure=lambda: sys.exit(1))
 
 
 def insert_file(filename, user_id):
-    """Insert a new file entry and returns its id."""
+    """
+    Insert a new file entry and returns its id.
+
+    :param filename: Name of the file to be inserted
+    :type filename: str
+    :param user_id: Id of the user inserting the file
+    :type user_id: str
+    :raises Exception: Error when attempting to insert a file
+    :return: The file id assigned to the file
+    :rtype: str
+    """
     with connection.cursor() as cur:
         cur.execute('SELECT local_ega.insert_file(%(filename)s,%(user_id)s);',
                     {'filename': filename,
@@ -143,7 +169,16 @@ def insert_file(filename, user_id):
 
 
 def set_file_encrypted_checksum(file_id, encrypted_checksum, encrypted_checksum_type):
-    """Insert encrypted checksum."""
+    """
+    Insert encrypted checksum.
+
+    :param file_id: The id of the file to set the checksum
+    :type file_id: str
+    :param encrypted_checksum: The encrypted hash of the file
+    :type encrypted_checksum: str
+    :param encrypted_checksum_type: Checksum type used
+    :type encrypted_checksum_type: str
+    """
     with connection.cursor() as cur:
         cur.execute('UPDATE local_ega.files '
                     'SET inbox_file_checksum = %(encrypted_checksum)s, '
@@ -155,7 +190,18 @@ def set_file_encrypted_checksum(file_id, encrypted_checksum, encrypted_checksum_
 
 
 def set_error(file_id, error, from_user=False):
-    """Store error related to ``file_id`` in database."""
+    """
+    Store and fetch errors related to ``file_id`` in database.
+
+    :param file_id: The id of the file to set an error
+    :type file_id: str
+    :param error: object representing an error message
+    :type error: object
+    :param from_user: Whether it is an user error or not, defaults to False
+    :type from_user: bool, optional
+    :return: List of tuples containing the fetched records
+    :rtype: list(tuple)
+    """
     assert file_id, 'Eh? No file_id?'
     assert error, 'Eh? No error?'
     LOG.debug('Setting error for %s: %s | Cause: %s', file_id, error, error.__cause__)
@@ -171,7 +217,14 @@ def set_error(file_id, error, from_user=False):
 
 
 def get_info(file_id):
-    """Retrieve information for ``file_id``."""
+    """
+    Retrieve information for ``file_id``.
+
+    :param file_id: The id of the file to get info from
+    :type file_id: str
+    :return: A tuple containing the fetched record
+    :rtype: tuple
+    """
     with connection.cursor() as cur:
         query = 'SELECT inbox_path, archive_path, stable_id, header from local_ega.files WHERE id = %(file_id)s;'
         cur.execute(query, {'file_id': file_id})
@@ -187,7 +240,12 @@ def get_header(file_id):
 
 
 def mark_in_progress(file_id):
-    """Mark file in progress."""
+    """
+    Mark file in progress.
+
+    :param file_id: The id of the file to mark in progress
+    :type file_id: str
+    """
     LOG.debug('Marking file_id %s with "IN_INGESTION"', file_id)
     assert file_id, 'Eh? No file_id?'
     with connection.cursor() as cur:
@@ -197,7 +255,18 @@ def mark_in_progress(file_id):
 
 
 def set_stable_id(filepath, user, encrypted_checksum, stable_id):
-    """Update File with stable ID."""
+    """
+    Update File with stable ID.
+
+    :param filepath: Target file path
+    :type filepath: str
+    :param user: User who submitted the file
+    :type user: str
+    :param encrypted_checksum: Encrypted checksum of the file
+    :type encrypted_checksum: str
+    :param stable_id: Accession id or stable id assigned to the file
+    :type stable_id: str
+    """
     LOG.debug('Updating filepath %s for user %s with stable ID "%s"', filepath, user, stable_id)
     with connection.cursor() as cur:
         cur.execute('UPDATE local_ega.files '
@@ -217,7 +286,14 @@ def set_stable_id(filepath, user, encrypted_checksum, stable_id):
 
 
 def store_header(file_id, header):
-    """Store header for ``file_id``."""
+    """
+    Store header for ``file_id``.
+
+    :param file_id: The id of the file to store the header
+    :type file_id: str
+    :param header: The header of the file
+    :type header: str
+    """
     assert file_id, 'Eh? No file_id?'
     assert header, 'Eh? No header?'
     LOG.debug('Store header for file_id %s', file_id)
@@ -230,7 +306,16 @@ def store_header(file_id, header):
 
 
 def set_archived(file_id, archive_path, archive_filesize):
-    """Archive ``file_id``."""
+    """
+    Archive ``file_id``.
+
+    :param file_id: The id of the file to set as archived
+    :type file_id: str
+    :param archive_path: Archive path of the file to set as archived
+    :type archive_path: str
+    :param archive_filesize: Size of the file
+    :type archive_filesize: str
+    """
     assert file_id, 'Eh? No file_id?'
     assert archive_path, 'Eh? No archive name?'
     LOG.debug('Setting status to archived for file_id %s', file_id)
@@ -247,7 +332,14 @@ def set_archived(file_id, archive_path, archive_filesize):
 
 
 def check_session_keys_checksums(session_key_checksums):
-    """Check if this session key is (likely) already used."""
+    """
+    Check if this session key is (likely) already used.
+
+    :param session_key_checksums: Session key checksum to check against
+    :type session_key_checksums: str
+    :return: Whether the session keys were found or not
+    :rtype: bool
+    """
     assert session_key_checksums, 'Eh? No checksum for the session keys?'
     LOG.debug('Check if session keys (hash) are already used: %s', session_key_checksums)
     with connection.cursor() as cur:
@@ -259,7 +351,16 @@ def check_session_keys_checksums(session_key_checksums):
 
 
 def mark_completed(file_id, session_key_checksums, digest_sha256):
-    """Mark file as completed."""
+    """
+    Mark file as completed.
+
+    :param file_id: The id of the file to set as completed
+    :type file_id: str
+    :param session_key_checksums: Session key checksum
+    :type session_key_checksums: str
+    :param digest_sha256: sha256 digest of the file
+    :type digest_sha256: str
+    """
     LOG.debug('Marking file_id %s with "COMPLETED"', file_id)
     assert file_id, 'Eh? No file_id?'
     with connection.cursor() as cur:

@@ -8,32 +8,45 @@ class Key():
     """Base class holding the information about a keypair."""
 
     def __init__(self, config):
-        """Initiliaze the Key object from a dict."""
+        """
+        Initiliaze the Key object from a dict.
+
+        :param config: A dictionary containing key configuration
+        :type config: dict
+        """
         self.config = config
 
     def public(self):
-        """Get the public key part.
+        """
+        Get the public key part.
 
-        Returns bytes
+        :raises NotImplementedError: It should return bytes
         """
         raise NotImplementedError('subclasses of Key must provide an public() method')
 
     def private(self):
-        """Get the private key part.
+        """
+        Get the private key part.
 
-        Returns bytes
+        :raises NotImplementedError: It should return bytes
         """
         raise NotImplementedError('subclasses of Key must provide an private() method')
 
 
 class C4GHFileKey(Key):
-    """Loading a Crypt4GH-formatted file, and unlocking it using a passphrase.
+    """
+    Loading a Crypt4GH-formatted file, and unlocking it using a passphrase.
 
     See https://crypt4gh.readthedocs.io/en/latest/keys.html
     """
 
     def __init__(self, config):
-        """Initiliaze the Key object from a dict."""
+        """
+        Initiliaze the Key object from a dict.
+
+        :param config: A dictionary containing C4GH configuration
+        :type config: dict
+        """
         filepath = CONF.get_value(config, 'filepath')
         passphrase = CONF.get_value(config, 'passphrase')
         assert(filepath and passphrase)
@@ -52,16 +65,20 @@ class C4GHFileKey(Key):
         LOG.info('Successfully loaded a Crypt4GH-formatted key from file')
 
     def public(self):
-        """Get the public key part.
+        """
+        Get the public key part.
 
-        Returns 32 bytes
+        :return: It returns 32 bytes
+        :rtype: bytes
         """
         return self.pubkey
 
     def private(self):
-        """Get the private key part.
+        """
+        Get the private key part.
 
-        Returns 32 bytes
+        :return: It returns 32 bytes
+        :rtype: bytes
         """
         return self.seckey
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""This module reads a message from the ``archived`` queue, and attempts to decrypt the file.
+"""
+This module reads a message from the ``archived`` queue, and attempts to decrypt the file.
 
 The decryption includes a checksum step.
 It the checksum is valid, we consider that the archive has a properly
@@ -28,70 +29,22 @@ from .utils.amqp import consume
 LOG = logging.getLogger(__name__)
 
 
-class PrependHeaderFile():
-    """IO reader to inject header bytes in front of file."""
-
-    def __init__(self, header, bulk):
-        """Initiliaze an IO reader with header prepended."""
-        assert(header)
-        self.header = header
-        self.file = bulk
-        self.pos = 0
-        self.header_length = len(header)
-
-    def seek(self, offset, whence):
-        """Seek within the file."""
-        # Not needed because we decrypt all of it, and not only a range
-        raise NotImplementedError(f'Moving file pointer to {offset}: Unused case')
-
-    def read(self, size=-1):
-        """Read `size` bytes.
-
-        If size<-1, raise NotImplementedError, because it is an unused case.
-        """
-        # if size < 0: # read all
-        #     if self.pos >= self.length: # heade consumed already
-        #         return self.file.read()
-        #     return self.header[self.pos:] + self.file.read()
-        if size < 1:
-            raise NotImplementedError(f'Reading {size} bytes: Unused case')
-
-        if self.pos + size <= self.header_length:
-            res = self.header[self.pos:self.pos+size]
-            self.pos += size
-            return res
-
-        if self.pos + size > self.header_length:
-            if self.pos >= self.header_length:  # already
-                return self.file.read(size)
-
-            assert(self.header_length - self.pos > 0)
-            res = self.header[self.pos:]
-            self.pos += size
-            return res + self.file.read(size-(self.header_length - self.pos))
-
-    def readinto(self, b):
-        """Fill the buffer `b`.
-
-        Returns the number of bytes read.
-        """
-        assert(isinstance(b, bytearray))
-        data = self.read(len(b))
-        n = len(data)
-        b[:n] = data
-        return n
-
-    # def readinto(self, b):
-    #     m = memoryview(b).cast('B')
-    #     data = self.read(len(m))
-    #     n = len(data)
-    #     m[:n] = data
-    #     return n
-
-
 @errors.catch(ret_on_error=(None, True))
 def work(key, mover, data):
-    """Verify that the file in the archive can be properly decrypted."""
+    """
+    Verify that the file in the archive can be properly decrypted.
+
+    :param key: Key used for decryption
+    :type key: C4GHFileKey
+    :param mover: An instance of a POSIX or S3 storage handler
+    :type mover: FileStorage or S3Storage
+    :param data: A dictionary containing the user, file path, file checksum and encrypted checksum
+    :type data: dict
+    :raises exceptions.SessionKeyDecryptionError: Decryption could not be performed
+    :raises exceptions.SessionKeyAlreadyUsedError: Session key was already used
+    :return: tuple containing reply message
+    :rtype: tuple
+    """
     LOG.info('Verification | message: %s', data)
 
     file_id = data['file_id']
@@ -118,10 +71,12 @@ def work(key, mover, data):
     md_md5 = hashlib.md5()  # we also calculate the md5 for the stable ID attribution (useless: Make EBI drop md5).
 
     def process_output():
+        """Add data to the current checksum process."""
         while True:
             data = yield
             md_md5.update(data)
             md_sha256.update(data)
+
     output = process_output()
     next(output)  # start it
 
@@ -160,7 +115,12 @@ def work(key, mover, data):
 
 
 def main(args=None):
-    """Run verify service."""
+    """
+    Run verify service, which waits for messages from the queue archived.
+
+    :param args: Service configuration arguments, defaults to None
+    :type args: list, optional
+    """
     if not args:
         args = sys.argv[1:]
 
