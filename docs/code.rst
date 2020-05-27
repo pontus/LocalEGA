@@ -27,18 +27,18 @@ Ingestion Worker
 Utility Functions
 -----------------
 
-.. automodule:: lega.utils
-
-.. autosummary::
-   :toctree: lega.utils
-
-    lega.utils.amqp
-    lega.utils.checksum
-    lega.utils.db
-    lega.utils.storage
-    lega.utils.exceptions
-    lega.utils.key
-    lega.utils.logging
+.. automodule:: lega.utils.checksum
+   :members:
+.. automodule:: lega.utils.db
+   :members:
+.. automodule:: lega.utils.storage
+   :members:
+.. automodule:: lega.utils.exceptions
+   :members:
+.. automodule:: lega.utils.key
+   :members:
+.. automodule:: lega.utils.logging
+   :members:
 
 .. include:: tests.rst
 
