@@ -292,9 +292,11 @@ function wait_db {
 	count=$((count+1)) 
     done
 
-    if [ "$count" -lt 120 ];then 
+    if [ "$count" -lt 120 ];then
+      echo "Database came back in time after $count rounds"
       true
     else
       echo "Gave up waiting for db"
+      false
     fi
 }
