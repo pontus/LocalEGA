@@ -30,6 +30,7 @@ function teardown () {
     run docker start localega-db.default
 
     legarun wait_db
+    [ 0 -eq "$status" ]
 
     # Save current contents
     run docker exec -i localega-db.default pg_dumpall -c -h /var/lib/postgresql/ > "$dumpfile"
@@ -40,7 +41,10 @@ function teardown () {
     run docker start localega-db.default
 
     legarun wait_db
+    [ 0 -eq "$status" ]
+
     legarun query_db local_ega.dbschema_version 'max(version)' 
+    [ 0 -eq "$status" ]
 
     schema_version=$(echo "$output" | grep '^\s*[0-9]$')
 
@@ -62,6 +66,7 @@ function teardown () {
     run docker start localega-db.default
 
     legarun wait_db
+    [ 0 -eq "$status" ]
 
     # Save current contents
     run docker exec -i localega-db.default pg_dumpall -c -h /var/lib/postgresql/ > "$dumpfile"
@@ -72,12 +77,17 @@ function teardown () {
     run docker start localega-db.default
 
     legarun wait_db
+    [ 0 -eq "$status" ]
+
     legarun query_db local_ega.dbschema_version 'max(version)' 
+    [ 0 -eq "$status" ]
 
     schema_version=$(echo "$output" | grep '^\s*[0-9]$')
+    [ 0 -eq "$status" ]
 
     # Restore old contents
     run docker exec -i localega-db.default psql -h /var/lib/postgresql < "$dumpfile"
+    [ 0 -eq "$status" ]
 
     [ 1 -le "$schema_version" ]
 }
