@@ -278,13 +278,23 @@ function query_db {
 
 function wait_db {
     # Try asking the database until we can connect properly.
+    count=0
 
-    while true; do
+    echo "Waiting for database to come back up"
+
+    while [ "$count" -lt 120 ] ; do
+
         if PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "" 2>&1 | grep ^psql:; then
 	    sleep 1
 	else
 	    break
 	fi
+	count=$((count+1)) 
     done
-    true
+
+    if [ "$count" -lt 120 ];then 
+      true
+    else
+      echo "Gave up waiting for db"
+    fi
 }
