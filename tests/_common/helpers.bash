@@ -284,7 +284,7 @@ function wait_db {
 
     while [ "$count" -lt 120 ] ; do
 
-        if PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "" 2>&1 | grep ^psql:; then
+        if PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select 6*7" 2>&1 | grep -F 42; then
 	    sleep 1
 	else
 	    break
