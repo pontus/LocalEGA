@@ -34,7 +34,7 @@ clean-all: clean clean-volumes
 
 preflight-check:
 	@echo "Ensure the system is up"
-	sleep 45
+	sleep 85
 
 # Note: "sleep 20" will be replaced with a script that checks for open port, mq settings, etc.
 # It might be a good idea to run it in the same network as the containers.

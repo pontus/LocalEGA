@@ -18,7 +18,7 @@ jobs:
             tests: 'robustness'
     
     runs-on: ${{ matrix.os }}
-    
+
     name: |
       ${{ matrix.tests }} tests with backend option '${{ matrix.backend }}'
     
@@ -56,6 +56,18 @@ jobs:
         docker-compose ps
         sleep 80
         popd
+
     - name: Run ${{ matrix.tests }} test
       run: |
         bats tests/${{ matrix.tests }}
+
+    - name: Collect logs from docker and more
+      if: ${{ failure() }}
+      run: cd deploy && docker-compose logs --no-color -t > ../tests/dockerlogs && cp -f /tmp/bats* ../tests || true
+
+    - name: Persist log files and more
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v1
+      with:
+        name: test_debugging_help
+        path: tests

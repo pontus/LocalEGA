@@ -275,3 +275,29 @@ function query_db {
 
     PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select $what from $table $whereclause;"
 }
+
+function wait_db {
+    # Try asking the database until we can connect properly.
+    count=0
+
+    echo "Waiting for database to come back up"
+
+    while [ "$count" -lt 120 ] ; do
+
+        if PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select 6*7" 2>&1 | grep -F 42; then
+	    break
+	else
+	    sleep 1
+	fi
+	count=$((count+1)) 
+    done
+
+    if [ "$count" -lt 120 ];then
+      echo "Database came back in time after $count rounds, we wait some more anyway "
+      sleep 6
+      true
+    else
+      echo "Gave up waiting for db"
+      false
+    fi
+}
