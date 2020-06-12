@@ -45,7 +45,7 @@ function teardown() {
 
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} 1 /dev/zero
     lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}"
@@ -79,7 +79,7 @@ function teardown() {
 
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # Create a random file Crypt4GH file of 1 MB
     lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} 1 /dev/urandom
@@ -121,7 +121,7 @@ function teardown() {
 
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # Stop the verify component, so only ingest works
     legarun docker stop verify

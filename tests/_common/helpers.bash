@@ -229,7 +229,7 @@ function lega_stable_id {
     local inputsource=${4:-/dev/urandom}
 
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # Generate a random file
     lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} $size $inputsource
@@ -249,7 +249,7 @@ function lega_ingest {
     local inputsource=${4:-/dev/urandom}
 
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # Generate a random file
     lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} $size $inputsource

@@ -73,7 +73,7 @@ function teardown() {
 @test "Do not ingest the same file twice" {
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # generate a file
     lega_generate_file "${TESTFILE}" "${TESTFILE_ENCRYPTED}" 1 /dev/urandom
@@ -98,7 +98,7 @@ function teardown() {
 
 @test "Ingest two files with the same name" {
     TESTFILE=$(uuidgen)
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # generate a file
     lega_generate_file "1_${TESTFILE}" "/${TESTFILES}/1_${TESTFILE}.c4gh" 1 /dev/urandom
@@ -141,7 +141,7 @@ function teardown() {
 @test "Do not ingest a file not in Crypt4GH format" {
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # Create a random file of 1 MB
     legarun dd if=/dev/urandom of=${TESTFILES}/${TESTFILE} count=1 bs=1048576
