@@ -66,7 +66,7 @@ function teardown() {
 
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # Stop the verify component, so only ingest works
     run docker stop verify

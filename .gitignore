@@ -13,6 +13,7 @@ tests/_common/backup
 tests/_common/mq/*.pem
 tests/_common/mq/*.crt
 tests/_common/mq/*.key
+tests/_common/db/*.dump
 
 # =====================================
 # Byte-compiled / optimized / DLL files
@@ -97,3 +98,4 @@ target/
 # pyenv
 # =====================================
 .python-version
+

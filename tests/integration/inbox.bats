@@ -58,7 +58,7 @@ function teardown() {
     do
 	t=$d/$(uuidgen)
 	touch ${TESTFILES}/$t # some empty files
-	TESTFILES_NAMES+=( "/$t" )
+	TESTFILES_NAMES+=( "$t" )
     done
 
     # Upload them (sshkey in agent already)
@@ -83,7 +83,7 @@ function teardown() {
     
     TESTFILE=$(uuidgen)
     TESTFILE_ENCRYPTED="${TESTFILES}/${TESTFILE}.c4gh"
-    TESTFILE_UPLOADED="/${TESTFILE}.c4gh"
+    TESTFILE_UPLOADED="${TESTFILE}.c4gh"
 
     # Generate a file
     lega_generate_file ${TESTFILE} ${TESTFILE_ENCRYPTED} 1 /dev/zero
