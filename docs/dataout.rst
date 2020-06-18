@@ -82,13 +82,37 @@ Configuration
 | ``LOGSTASH_PORT``                      |                                                                      | Port of the Logstash instance (if any)             |
 +----------------------------------------+----------------------------------------------------------------------+----------------------------------------------------+
 
-API Endpoints
--------------
+REST API Endpoints
+------------------
+
+.. note:: REST API can be disabled using ``REST_ENABLED`` environment variable.
 
 API endpoints listed as OpenAPI specification is available:
 
 .. literalinclude::  ./static/doa-api.yml
     :language: yaml
+
+Outbox functionality
+--------------------
+
+.. note:: Outbox can be disabled using ``OUTBOX_ENABLED`` environment variable.
+
+Outbox in DOA is RabbitMQ-based listener that can be triggered by incoming "export request". Template of such message:
+
+.. code-block:: javascript
+
+    {
+        "jwtToken": "...",         // mandatory: Elixir AAI token (see below)
+        "datasetId": "...",        // optional: either datasetId, or fileId should be specified
+        "fileId": "...",           // optional: either datasetId, or fileId should be specified
+        "publicKey": "...",        // mandatory: Crypt4GH public key of the requester
+        "startCoordinate": "...",  // optional
+        "endCoordinate": "...",    // optional
+    }
+
+Upon receival of such message, DOA acts exactly the same way as if this information arrived via REST endpoint. The
+difference is that data is not "returned" to the requester in a response, but is being dumped to the outbox location
+(re-encrypted for the requester).
 
 Handling Permissions
 --------------------
