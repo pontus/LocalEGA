@@ -114,6 +114,9 @@ Upon receival of such message, DOA acts exactly the same way as if this informat
 difference is that data is not "returned" to the requester in a response, but is being dumped to the outbox location
 (re-encrypted for the requester).
 
+The reason for having this functionality is so-called "offline" use-case, where DOA is running in the isolated
+environment (like TSD) and can't expose REST API (but still can receive RabbitMQ messages).
+
 Handling Permissions
 --------------------
 
