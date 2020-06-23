@@ -28,16 +28,18 @@ def work(data):
     :return: A tuple indicating the stable id has been mapped.
     :rtype: tuple
     """
+
     filepath = data['filepath']
     user = data['user']
-    encrypted_checksum = data['file_checksum']
-    stable_id = data['stable_id']
-    LOG.info("Mapping file with path %s and checksum %s to stable_id %s", filepath, encrypted_checksum, stable_id)
+    checksum_data = filter(lambda x : x['type'] == 'sha256', data['decrypted_checksums'])
+    decrypted_checksum = checksum_data[0]['value']
+    stable_id = data['accession_id']
+    LOG.info("Mapping file with path %s and checksum %s to stable_id %s", filepath, decrypted_checksum, stable_id)
 
     # Remove file from the inbox
     # TODO
 
-    db.set_stable_id(filepath, user, encrypted_checksum, stable_id)  # That will flag the entry as 'Ready'
+    db.set_stable_id(filepath, user, decrypted_checksum, stable_id)  # That will flag the entry as 'Ready'
 
     LOG.info("Stable ID %s mapped to %s", stable_id, filepath)
     return (None, False)
