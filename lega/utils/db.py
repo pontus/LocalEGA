@@ -254,7 +254,7 @@ def mark_in_progress(file_id):
                      'file_id': file_id})
 
 
-def set_stable_id(filepath, user, encrypted_checksum, stable_id):
+def set_stable_id(filepath, user, decrypted_checksum, stable_id):
     """
     Update File with stable ID.
 
@@ -262,8 +262,8 @@ def set_stable_id(filepath, user, encrypted_checksum, stable_id):
     :type filepath: str
     :param user: User who submitted the file
     :type user: str
-    :param encrypted_checksum: Encrypted checksum of the file
-    :type encrypted_checksum: str
+    :param decrypted_checksum: Decrypted checksum of the file
+    :type decrypted_checksum: str
     :param stable_id: Accession id or stable id assigned to the file
     :type stable_id: str
     """
@@ -273,13 +273,13 @@ def set_stable_id(filepath, user, encrypted_checksum, stable_id):
                     'SET status = %(status)s, '
                     '    stable_id = %(stable_id)s '
                     'WHERE elixir_id = %(user)s AND inbox_path = %(filepath)s '
-                    ' AND inbox_file_checksum = %(encrypted_checksum)s'
+                    ' AND archive_file_checksum = %(decrypted_checksum)s'
                     ' AND status != %(disabled)s;',
                     {'status': 'READY',
                      'user': user,
                      'stable_id': stable_id,
                      'filepath': filepath,
-                     'encrypted_checksum': encrypted_checksum,
+                     'decrypted_checksum': decrypted_checksum,
                      # The completed status is to avoid DISABLED file
                      # ingested twice with same checksum and file id and path
                      'disabled': 'DISABLED'})
