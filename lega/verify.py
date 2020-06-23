@@ -144,7 +144,7 @@ def main(args=None):
 
     do_work = partial(work, key_loader(key_section), store('archive', path))
 
-    consume(do_work, 'archived', 'completed')
+    consume(do_work, 'archived', 'verified')
 
 
 if __name__ == '__main__':
