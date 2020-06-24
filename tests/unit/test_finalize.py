@@ -21,9 +21,12 @@ class testFinalize(unittest.TestCase):
     def test_work(self, mock_db):
         """Test finalize worker, should insert into database."""
         # mock_db.set_stable_id.return_value = mock.Mock()
-        data = {'stable_id': '1', 'filepath': '/123.c4gh', 'user': 'user', 'file_checksum': 'some256'}
+        data = {'accession_id': '1', 'filepath': '/123.c4gh', 'user': 'user',
+                "decrypted_checksums": [{'type': 'sha256', 'value': '7c03e8b0789ecf5ecdeb34ef37a6ec8620912e8b1a9f15f22233471e9b457130'},
+                                        {'type': 'md5', 'value': 'b5a2d2075f200552829ab0c3a056bf13'}]}
         work(data)
-        mock_db.set_stable_id.assert_called_with('/123.c4gh', 'user', 'some256', '1')
+        mock_db.set_stable_id.assert_called_with('/123.c4gh', 'user',
+                                                 '7c03e8b0789ecf5ecdeb34ef37a6ec8620912e8b1a9f15f22233471e9b457130', '1')
 
     @mock.patch('lega.finalize.consume')
     def test_main(self, mock_consume):
