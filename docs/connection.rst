@@ -63,19 +63,19 @@ creates the credentials to connect to that ``vhost`` in the form of a
 versioning and is internal to CentralEGA. The queues connected to that
 exchange are also internal to CentralEGA.
 
-+-----------------+------------------------------------+
-| Name            | Purpose                            |
-+=================+====================================+
-| files           | Triggers for file ingestion        |
-+-----------------+------------------------------------+
-| completed       | When files are backed uo           |
-+-----------------+------------------------------------+
-| verified        | When files are properly ingested   |
-+-----------------+------------------------------------+
-| errors          | User-related errors                |
-+-----------------+------------------------------------+
-| inbox           | Notifications of uploaded files    |
-+-----------------+------------------------------------+
++-----------------+-------------------------------------------------+
+| Name            | Purpose                                         |
++=================+=================================================+
+| files           | Triggers for file ingestion                     |
++-----------------+-------------------------------------------------+
+| completed       | When files are backed up                        |
++-----------------+-------------------------------------------------+
+| verified        | When files are properly ingested  and verified  |
++-----------------+-------------------------------------------------+
+| errors          | User-related errors                             |
++-----------------+-------------------------------------------------+
+| inbox           | Notifications of uploaded files                 |
++-----------------+-------------------------------------------------+
 
 ``LocalMQ`` contains two exchanges named ``lega`` and ``cega``,
 and the following queues, in the default ``vhost``:
@@ -109,7 +109,7 @@ the following routing keys:
 +-----------------------+-------------------------------------------------------+
 | Name                  | Purpose                                               |
 +=======================+=======================================================+
-| files.verified        | In case the file is properly ingested                 |
+| files.verified        | In case the file is properly ingested and verified    |
 +-----------------------+-------------------------------------------------------+
 | files.completed       | In case the file has been stored in the archive       |
 +-----------------------+-------------------------------------------------------+
