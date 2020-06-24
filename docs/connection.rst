@@ -68,7 +68,9 @@ exchange are also internal to CentralEGA.
 +=================+====================================+
 | files           | Triggers for file ingestion        |
 +-----------------+------------------------------------+
-| completed       | When files are properly ingested   |
+| completed       | When files are backed uo           |
++-----------------+------------------------------------+
+| verified        | When files are properly ingested   |
 +-----------------+------------------------------------+
 | errors          | User-related errors                |
 +-----------------+------------------------------------+
@@ -107,7 +109,9 @@ the following routing keys:
 +-----------------------+-------------------------------------------------------+
 | Name                  | Purpose                                               |
 +=======================+=======================================================+
-| files.completed       | In case the file is properly ingested                 |
+| files.verified        | In case the file is properly ingested                 |
++-----------------------+-------------------------------------------------------+
+| files.completed       | In case the file has been stored in the archive       |
 +-----------------------+-------------------------------------------------------+
 | files.error           | In case a user-related error is detected              |
 +-----------------------+-------------------------------------------------------+
@@ -187,7 +191,7 @@ The ``Ingest`` service upon successful operation will send a message to
       "file_checksum": "abcdefghijklmnopqrstuvwxyz"
    }
 
-``Verify`` service will consume set message and will forward to ``completed`` queue
+``Verify`` service will consume set message and will forward to ``verified`` queue
 and *shoveled* to ``CEGAMQ`` but also adding a key ``decrypted_checksums``, 
 which will respond with the same content, but adding the `Accession ID`.
 
@@ -204,15 +208,18 @@ which will respond with the same content, but adding the `Accession ID`.
    }
 
 ``Finalize`` service should receive the message below and assign the `Accession ID` to the
-corresponding file.
+corresponding file and send a message to ``completed`` queue.
 
 .. code-block:: javascript
 
    {
       "user":"john",
       "filepath":"somedir/encrypted.file.gpg",
-      "file_checksum": "abcdefghijklmnopqrstuvwxyz",
-      "stable_id": "EGAF001"
+      "accession_id": "EGAF001",
+      "decrypted_checksums": [
+         { "type": "md5", "value": "abcdefghijklmnopqrstuvwxyz"},
+         { "type": "sha256", "value": "12345678901234567890"}
+      ]
    }
 
 
