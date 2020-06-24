@@ -48,9 +48,9 @@ function teardown() {
 
 # Ingesting a 1 MB file
 # ----------------------
-# A message should be found in the completed queue
+# A message should be found in the verified queue
 
 @test "Ingest properly a test file" {
     
-    lega_ingest $(uuidgen) 1 v1.files.completed /dev/urandom
+    lega_ingest $(uuidgen) 1 v1.files.verified /dev/urandom
 }

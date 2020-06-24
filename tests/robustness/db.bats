@@ -48,14 +48,14 @@ function teardown() {
 
 @test "Ingestion after db restart" {
 
-    lega_ingest $(uuidgen) 1 v1.files.completed /dev/zero
+    lega_ingest $(uuidgen) 1 v1.files.verified /dev/zero
 
     run docker stop localega-db.default
     run docker start localega-db.default
     [ "$status" -eq 0 ]
     #sleep 15
 
-    lega_ingest $(uuidgen) 1 v1.files.completed /dev/zero
+    lega_ingest $(uuidgen) 1 v1.files.verified /dev/zero
 }
 
 
@@ -101,6 +101,6 @@ function teardown() {
     sleep 15
 
     # Check that a message with the above correlation id arrived in the expected queue
-    retry_until 0 20 2 ${MQ_FIND} v1.files.completed "${CORRELATION_ID}"
+    retry_until 0 20 2 ${MQ_FIND} v1.files.verified "${CORRELATION_ID}"
     [ "$status" -eq 0 ]
 }

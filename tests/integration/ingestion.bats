@@ -44,15 +44,15 @@ function teardown() {
 
 # Ingesting a 10MB file
 # ----------------------
-# A message should be found in the completed queue
+# A message should be found in the verified queue
 
 @test "Ingest properly a 10MB file" {
-    lega_ingest $(uuidgen) 10 v1.files.completed
+    lega_ingest $(uuidgen) 10 v1.files.verified
 }
 
 # Ingesting a "big" file
 # ----------------------
-# A message should be found in the completed queue
+# A message should be found in the verified queue
 #
 # Note: We have tested with a 10 GB file by hand,
 # and we are here 'only' ingesting a 1 GB file (for speed)
@@ -60,14 +60,14 @@ function teardown() {
 # so we're using the /dev/zero for that particular test
 
 @test "Ingest properly a 1GB file" {
-    lega_ingest $(uuidgen) 1000 v1.files.completed /dev/zero
+    lega_ingest $(uuidgen) 1000 v1.files.verified /dev/zero
 }
 
 # Upload 2 files encrypted with same session key
 # ----------------------------------------------
 # This is done by uploading the same file twice.
 #
-# The first upload should end up in the completed queue
+# The first upload should end up in the verified queue
 # while the second one should be in the error queue
 
 @test "Do not ingest the same file twice" {
@@ -83,7 +83,7 @@ function teardown() {
     lega_upload "${TESTFILE_ENCRYPTED}" "${TESTFILE_UPLOADED}.2"
 
     # First time
-    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.completed 30 10
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.verified 30 10
     
     # Second time goes to error
     lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}.2" v1.files.error 30 10
@@ -107,7 +107,7 @@ function teardown() {
     lega_upload "/${TESTFILES}/1_${TESTFILE}.c4gh" "${TESTFILE_UPLOADED}"
 
     # First time
-    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.completed 30 10
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.verified 30 10
 
     # Flush queue so we don't get the same old correlation id.
     legarun ${MQ_PURGE} --queues v1.files.inbox
@@ -118,7 +118,7 @@ function teardown() {
     # Upload second file with same name
     lega_upload "/${TESTFILES}/2_${TESTFILE}.c4gh" "${TESTFILE_UPLOADED}"
 
-    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.completed 30 10
+    lega_trigger_ingestion "${TESTUSER}" "${TESTFILE_UPLOADED}" v1.files.verified 30 10
 
     legarun query_db local_ega.main status "submission_file_path='${TESTFILE_UPLOADED}'"
     lines_with_completed=$(echo "$output" | grep COMPLETED | wc -l)
@@ -160,7 +160,7 @@ function teardown() {
 
 # Ingesting a file from a subdirectory
 # ------------------------------------
-# A message should be found in the completed queue.
+# A message should be found in the verified queue.
 
 @test "Ingest a file from a subdirectory" {
     mkdir -p ${TESTFILES}/dir1/dir2/dir3
@@ -169,7 +169,7 @@ function teardown() {
     legarun ${LEGA_SFTP} ${TESTUSER}@localhost <<< $"mkdir dir1"
     legarun ${LEGA_SFTP} ${TESTUSER}@localhost <<< $"mkdir dir1/dir2"
     legarun ${LEGA_SFTP} ${TESTUSER}@localhost <<< $"mkdir dir1/dir2/dir3"
-    lega_ingest dir1/dir2/dir3/$(uuidgen) 1 v1.files.completed
+    lega_ingest dir1/dir2/dir3/$(uuidgen) 1 v1.files.verified
 }
 
 

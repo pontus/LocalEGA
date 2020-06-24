@@ -34,7 +34,7 @@ MQ_CONSUME="python ${HERE}/mq/consume.py --connection ${CEGA_CONNECTION}"
 MQ_FIND="python ${HERE}/mq/find.py --connection ${CEGA_CONNECTION}"
 MQ_GET="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION}"
 MQ_GET_INBOX="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.inbox"
-MQ_GET_COMPLETED="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.completed"
+MQ_GET_VERIFIED="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.verified"
 MQ_PUBLISH="python ${HERE}/mq/publish.py --connection ${CEGA_CONNECTION}"
 MQ_PURGE="python ${HERE}/mq/purge.py --connection ${CEGA_CONNECTION}"
 
