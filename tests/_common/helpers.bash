@@ -32,6 +32,7 @@ cp -f ${MAIN_REPO}/deploy/private/config/certs/root.ca.crt ${HERE}/mq/.
 # Utilities to scan the Message Queues
 MQ_CONSUME="python ${HERE}/mq/consume.py --connection ${CEGA_CONNECTION}"
 MQ_FIND="python ${HERE}/mq/find.py --connection ${CEGA_CONNECTION}"
+MQ_ACCESSION="python ${HERE}/mq/accession.py --connection ${CEGA_CONNECTION}"
 MQ_GET="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION}"
 MQ_GET_INBOX="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.inbox"
 MQ_GET_VERIFIED="python ${HERE}/mq/get.py --connection ${CEGA_CONNECTION} v1.files.verified"
@@ -206,19 +207,20 @@ function lega_trigger_stabled_id {
     [ "$status" -eq 0 ]
 
     # Fetch the correlation id for that file (Hint: with user/filepath combination)
-    retry_until 0 $attempts $delay ${MQ_GET_COMPLETED} "${user}" "${upload_path}"
+    retry_until 0 $attempts $delay ${MQ_GET_VERIFIED} "${user}" "${upload_path}"
     [ "$status" -eq 0 ]
     CORRELATION_ID=$output
 
+    retry_until 0 $attempts $delay ${MQ_ACCESSION} v1.files.verified "${CORRELATION_ID}" "${user}" "${upload_path}"
+    MESSAGE=$output
+
     # Publish the file to simulate a CentralEGA trigger
-    MESSAGE="{ \"user\": \"${user}\", \"filepath\": \"${upload_path}\",
-               \"file_checksum\": \"somechecksum\", \"stable_id\": \"EGAF001\"}"
-    legarun ${MQ_PUBLISH} --correlation_id "${CORRELATION_ID}" stableIDs "$MESSAGE"
+    legarun ${MQ_PUBLISH} --correlation_id "${CORRELATION_ID}" stableIDs "${MESSAGE}"
     [ "$status" -eq 0 ]
 
     # Check that a message with the above correlation id arrived in the expected queue
     # Waiting attempts * delay seconds.
-    output=$(PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select stable_id from local_ega.files where inbox_file_checksum = 'somechecksum' limit 1;")
+    output=$(PGPASSWORD=${DBPASSWORD} psql -tA -h localhost -p 5432 -U lega_in lega -c "select stable_id from local_ega.files where stable_id = 'EGAF001' limit 1;")
     [[ "$output" =~ "EGAF001" ]]
 }
 
