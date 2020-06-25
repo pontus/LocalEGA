@@ -4,6 +4,8 @@
 """
 Consumes messages to update the database with stable IDs to file IDS mappings.
 
+It also sends a message to files.completed to mark a file as completed in the CEGA side.
+
 Messages can be delivered to a local broker by registering an upstream queue.
 
 """
@@ -30,17 +32,24 @@ def work(data):
     """
     filepath = data['filepath']
     user = data['user']
-    encrypted_checksum = data['file_checksum']
-    stable_id = data['stable_id']
-    LOG.info("Mapping file with path %s and checksum %s to stable_id %s", filepath, encrypted_checksum, stable_id)
+    checksum_data = list(filter(lambda x: x['type'] == 'sha256', data['decrypted_checksums']))
+    decrypted_checksum = checksum_data[0]['value']
+    stable_id = data['accession_id']
+    LOG.info("Mapping file with path %s and checksum %s to stable_id %s", filepath, decrypted_checksum, stable_id)
 
     # Remove file from the inbox
     # TODO
 
-    db.set_stable_id(filepath, user, encrypted_checksum, stable_id)  # That will flag the entry as 'Ready'
+    db.set_stable_id(filepath, user, decrypted_checksum, stable_id)  # That will flag the entry as 'Ready'
 
     LOG.info("Stable ID %s mapped to %s", stable_id, filepath)
-    return (None, False)
+
+    # Send message to mark file as completed on the CEGA side
+    completed_data = data
+    completed_data.pop("type", None)
+    LOG.info(f"Reply message to files.completed: {completed_data}")
+
+    return (completed_data, False)
 
 
 def main(args=None):
@@ -56,7 +65,7 @@ def main(args=None):
     CONF.setup(args)  # re-conf
 
     # upstream link configured in local broker
-    consume(work, 'stableIDs', None)
+    consume(work, 'stableIDs', 'completed')
 
 
 if __name__ == '__main__':

@@ -83,6 +83,6 @@ function teardown() {
 
     # Check that a message with the above correlation id arrived in the expected queue
     # Waiting 300 seconds.
-    retry_until 0 30 10 ${MQ_GET} v1.files.completed "${TESTUSER}" "/${TESTFILE}.c4ga"
+    retry_until 0 30 10 ${MQ_GET} v1.files.verified "${TESTUSER}" "/${TESTFILE}.c4ga"
     [ "$status" -eq 0 ]
 }

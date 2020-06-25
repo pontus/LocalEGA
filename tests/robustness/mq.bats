@@ -107,7 +107,7 @@ function teardown() {
     sleep 20 # is it enough?
     
     # Check that a message with the above correlation id arrived in the expected queue
-    retry_until 0 30 10 ${MQ_FIND} v1.files.completed "${CORRELATION_ID}"
+    retry_until 0 30 10 ${MQ_FIND} v1.files.verified "${CORRELATION_ID}"
     [ "$status" -eq 0 ]
 
 }
@@ -161,6 +161,6 @@ function teardown() {
     legarun docker restart verify.default
 
     # Check that a message with the above correlation id arrived in the expected queue
-    retry_until 0 30 10 ${MQ_FIND} v1.files.completed "${CORRELATION_ID}"
+    retry_until 0 30 10 ${MQ_FIND} v1.files.verified "${CORRELATION_ID}"
     [ "$status" -eq 0 ]
 }
