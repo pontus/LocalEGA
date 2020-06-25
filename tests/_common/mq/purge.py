@@ -6,7 +6,6 @@
 import argparse
 import os
 import ssl
-import sys
 from pathlib import Path
 
 import pika
@@ -15,7 +14,7 @@ hellgate_queues = [ 'v1.files',
                     'v1.files.completed',
                     'v1.files.error',
                     'v1.files.inbox',
-                    'v1.files.processing',
+                    'v1.files.verified',
                     'v1.stableIDs',
 ]
 

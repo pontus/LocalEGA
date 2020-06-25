@@ -279,7 +279,7 @@ services:
     hostname: mq${HOSTNAME_DOMAIN}
     ports:
       - "${DOCKER_PORT_mq}:15672"
-    image: neicnordic/sda-mq:latest
+    image: "neicnordic/sda-mq:023"
     container_name: localega-mq-server${HOSTNAME_DOMAIN}
     labels:
         lega_label: "localega-mq-server"
