@@ -1,5 +1,7 @@
 # NeIC Sensitive Data Archive
 
+test
+
 This is a fork of https://github.com/EGA-archive/LocalEGA adapted for NeIC Tryggve2 use cases.
 
 ![](https://github.com/neicnordic/LocalEGA/workflows/Python%20unit%20tests/badge.svg)
